@@ -7,9 +7,10 @@
         android:label="sig"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-        <!-- Inserta tu clave de API aquí -->
+        <!-- Inserta tu clave de API aquí "AIzaSyBwq_P0ULoqAiJ43rDu5FN111dqLcjrG8o"-->
         <meta-data android:name="com.google.android.geo.API_KEY"
-               android:value="AIzaSyBwq_P0ULoqAiJ43rDu5FN111dqLcjrG8o"/>
+        
+               android:value="AIzaSyAWqeXTDh8ANrGorI7lfnfH6Zkt0JgSKe0"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

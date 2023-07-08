@@ -5,7 +5,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:math' show log2;
 import 'dart:math' as math;
 
-
 void main() {
   runApp(MyApp());
 }
@@ -138,10 +137,12 @@ class _MapsScreenState extends State<MapsScreen> {
         ),
       ),
       Marker(
-        markerId: MarkerId('DEPARTAMENTO DE EDUCACION A DISTANCIA Y TECNOLOGIA EDUCATIVA DEDTE'),
+        markerId: MarkerId(
+            'DEPARTAMENTO DE EDUCACION A DISTANCIA Y TECNOLOGIA EDUCATIVA DEDTE'),
         position: LatLng(-17.778044, -63.191087),
         infoWindow: InfoWindow(
-          title: 'DEPARTAMENTO DE EDUCACION A DISTANCIA Y TECNOLOGIA EDUCATIVA DEDTE',
+          title:
+              'DEPARTAMENTO DE EDUCACION A DISTANCIA Y TECNOLOGIA EDUCATIVA DEDTE',
           snippet: 'DEDTE',
         ),
       ),
@@ -178,7 +179,8 @@ class _MapsScreenState extends State<MapsScreen> {
         ),
       ),
       Marker(
-        markerId: MarkerId('UNIDAD DE POSTGRADO DE CIENCIAS EXACTAS Y TECNOLOGÍA'),
+        markerId:
+            MarkerId('UNIDAD DE POSTGRADO DE CIENCIAS EXACTAS Y TECNOLOGÍA'),
         position: LatLng(-17.778037, -63.190458),
         infoWindow: InfoWindow(
           title: 'UNIDAD DE POSTGRADO DE CIENCIAS EXACTAS Y TECNOLOGÍA',
@@ -218,7 +220,8 @@ class _MapsScreenState extends State<MapsScreen> {
         ),
       ),
       Marker(
-        markerId: MarkerId('DECANATO DE FACULTAD DE CIENCIA DE LA SALUD HUMANA'),
+        markerId:
+            MarkerId('DECANATO DE FACULTAD DE CIENCIA DE LA SALUD HUMANA'),
         position: LatLng(-17.776702, -63.190942),
         infoWindow: InfoWindow(
           title: 'DECANATO DE FACULTAD DE CIENCIA DE LA SALUD HUMANA',
@@ -242,7 +245,8 @@ class _MapsScreenState extends State<MapsScreen> {
         ),
       ),
       Marker(
-        markerId: MarkerId('VICEDECANATO FACULTAD DE CIENCIAS EXACTAS Y TECNOLOGIA'),
+        markerId:
+            MarkerId('VICEDECANATO FACULTAD DE CIENCIAS EXACTAS Y TECNOLOGIA'),
         position: LatLng(-17.775519, -63.195685),
         infoWindow: InfoWindow(
           title: 'VICEDECANATO FACULTAD DE CIENCIAS EXACTAS Y TECNOLOGIA',
@@ -250,10 +254,12 @@ class _MapsScreenState extends State<MapsScreen> {
         ),
       ),
       Marker(
-        markerId: MarkerId('DIRECCION DE LA CARRERA DE INGENIERIA EN CONTROL DE PROCESOS QUIMICA INDUSTRIAL'),
+        markerId: MarkerId(
+            'DIRECCION DE LA CARRERA DE INGENIERIA EN CONTROL DE PROCESOS QUIMICA INDUSTRIAL'),
         position: LatLng(-17.775511, -63.195682),
         infoWindow: InfoWindow(
-          title: 'DIRECCION DE LA CARRERA DE INGENIERIA EN CONTROL DE PROCESOS QUIMICA INDUSTRIAL',
+          title:
+              'DIRECCION DE LA CARRERA DE INGENIERIA EN CONTROL DE PROCESOS QUIMICA INDUSTRIAL',
           snippet: 'CARR: ING CTRL PROCE',
         ),
       ),
@@ -266,10 +272,12 @@ class _MapsScreenState extends State<MapsScreen> {
         ),
       ),
       Marker(
-        markerId: MarkerId('DECANATO DE LA FACULTAD DE CIENCIAS EXACTA Y TECNOLOGIAS FGET'),
+        markerId: MarkerId(
+            'DECANATO DE LA FACULTAD DE CIENCIAS EXACTA Y TECNOLOGIAS FGET'),
         position: LatLng(-17.775455, -63.195742),
         infoWindow: InfoWindow(
-          title: 'DECANATO DE LA FACULTAD DE CIENCIAS EXACTA Y TECNOLOGIAS FGET',
+          title:
+              'DECANATO DE LA FACULTAD DE CIENCIAS EXACTA Y TECNOLOGIAS FGET',
           snippet: 'DECA. FACULTAD  FCET',
         ),
       ),
@@ -282,7 +290,8 @@ class _MapsScreenState extends State<MapsScreen> {
         ),
       ),
       Marker(
-        markerId: MarkerId('DIRECCION DE LA CARRERA DE INGENIERIA EN ALIMENTOS'),
+        markerId:
+            MarkerId('DIRECCION DE LA CARRERA DE INGENIERIA EN ALIMENTOS'),
         position: LatLng(-17.775514, -63.195702),
         infoWindow: InfoWindow(
           title: 'DIRECCION DE LA CARRERA DE INGENIERIA EN ALIMENTOS',
@@ -306,7 +315,8 @@ class _MapsScreenState extends State<MapsScreen> {
         ),
       ),
       Marker(
-        markerId: MarkerId('DIRECCION DE LA CARRERA DE INGENIERIA ELECTROMECANICA'),
+        markerId:
+            MarkerId('DIRECCION DE LA CARRERA DE INGENIERIA ELECTROMECANICA'),
         position: LatLng(-17.775528, -63.195659),
         infoWindow: InfoWindow(
           title: 'DIRECCION DE LA CARRERA DE INGENIERIA ELECTROMECANICA',
@@ -346,7 +356,8 @@ class _MapsScreenState extends State<MapsScreen> {
         ),
       ),
       Marker(
-        markerId: MarkerId('DIRECCION DE TECNOLOGIAS DE LA INF, Y COMUNICACION. DTIC'),
+        markerId: MarkerId(
+            'DIRECCION DE TECNOLOGIAS DE LA INF, Y COMUNICACION. DTIC'),
         position: LatLng(-17.777146, -63.190794),
         infoWindow: InfoWindow(
           title: 'DIRECCION DE TECNOLOGIAS DE LA INF, Y COMUNICACION. DTIC',
@@ -394,7 +405,8 @@ class _MapsScreenState extends State<MapsScreen> {
         ),
       ),
       Marker(
-        markerId: MarkerId('FEDERACION UNIVERSITARIA DE AUXILIARES DE DOCENCIA'),
+        markerId:
+            MarkerId('FEDERACION UNIVERSITARIA DE AUXILIARES DE DOCENCIA'),
         position: LatLng(-17.777362, -63.190439),
         infoWindow: InfoWindow(
           title: 'FEDERACION UNIVERSITARIA DE AUXILIARES DE DOCENCIA',
@@ -426,26 +438,32 @@ class _MapsScreenState extends State<MapsScreen> {
         ),
       ),
       Marker(
-        markerId: MarkerId('DIRECCION DE CARRERA INGENIERIA EN REDES Y TELECOMUNICACIONES'),
+        markerId: MarkerId(
+            'DIRECCION DE CARRERA INGENIERIA EN REDES Y TELECOMUNICACIONES'),
         position: LatLng(-17.776183, -63.195021),
         infoWindow: InfoWindow(
-          title: 'DIRECCION DE CARRERA INGENIERIA EN REDES Y TELECOMUNICACIONES',
+          title:
+              'DIRECCION DE CARRERA INGENIERIA EN REDES Y TELECOMUNICACIONES',
           snippet: 'CARR. ING. EN REDES',
         ),
       ),
       Marker(
-        markerId: MarkerId('DECANATO DE LA FACULTAD DE CIENCIAS DE LA COMPUTACION Y TELECOMUNICACIONES FICCT'),
+        markerId: MarkerId(
+            'DECANATO DE LA FACULTAD DE CIENCIAS DE LA COMPUTACION Y TELECOMUNICACIONES FICCT'),
         position: LatLng(-17.776183, -63.195021),
         infoWindow: InfoWindow(
-          title: 'DECANATO DE LA FACULTAD DE CIENCIAS DE LA COMPUTACION Y TELECOMUNICACIONES FICCT',
+          title:
+              'DECANATO DE LA FACULTAD DE CIENCIAS DE LA COMPUTACION Y TELECOMUNICACIONES FICCT',
           snippet: 'DECANATO FICCT',
         ),
       ),
       Marker(
-        markerId: MarkerId('UNIDAD DE POSTGRADO E LA FACULTAD DE CIENCIAS DE LA COMPUTACION Y TELECOMUNICACIONES FICCT'),
+        markerId: MarkerId(
+            'UNIDAD DE POSTGRADO E LA FACULTAD DE CIENCIAS DE LA COMPUTACION Y TELECOMUNICACIONES FICCT'),
         position: LatLng(-17.776844, -63.195632),
         infoWindow: InfoWindow(
-          title: 'UNIDAD DE POSTGRADO E LA FACULTAD DE CIENCIAS DE LA COMPUTACION Y TELECOMUNICACIONES FICCT',
+          title:
+              'UNIDAD DE POSTGRADO E LA FACULTAD DE CIENCIAS DE LA COMPUTACION Y TELECOMUNICACIONES FICCT',
           snippet: 'PTGRDO FICCT',
         ),
       ),
@@ -744,7 +762,9 @@ class _MapsScreenState extends State<MapsScreen> {
       if (marker.infoWindow != null &&
           marker.infoWindow.title != null &&
           marker.infoWindow.snippet != null &&
-          marker.infoWindow.title!.toLowerCase().contains(query.toLowerCase())) {
+          marker.infoWindow.title!
+              .toLowerCase()
+              .contains(query.toLowerCase())) {
         suggestions.add(
           MarkerSuggestion(
             markerId: marker.markerId,
@@ -765,7 +785,8 @@ class _MapsScreenState extends State<MapsScreen> {
     });
 
     if (_mapController != null) {
-      Marker selectedMarker = _markers.firstWhere((marker) => marker.markerId == markerId);
+      Marker selectedMarker =
+          _markers.firstWhere((marker) => marker.markerId == markerId);
       _mapController!.animateCamera(
         CameraUpdate.newLatLng(selectedMarker.position),
       );
@@ -775,7 +796,9 @@ class _MapsScreenState extends State<MapsScreen> {
   void _updateMarkers() {
     for (Marker marker in _markers) {
       _markerIcons[marker.markerId] = BitmapDescriptor.defaultMarkerWithHue(
-        marker.markerId == _selectedMarker ? BitmapDescriptor.hueYellow : BitmapDescriptor.hueRed,
+        marker.markerId == _selectedMarker
+            ? BitmapDescriptor.hueYellow
+            : BitmapDescriptor.hueRed,
       );
     }
 
@@ -809,7 +832,8 @@ class _MapsScreenState extends State<MapsScreen> {
         northeast: LatLng(maxLat, maxLng),
       );
 
-      final CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 50);
+      final CameraUpdate cameraUpdate =
+          CameraUpdate.newLatLngBounds(bounds, 50);
       _mapController!.animateCamera(cameraUpdate);
     }
   }
