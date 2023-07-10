@@ -5,14 +5,17 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:math' show log2;
 import 'dart:math' as math;
 import './../model/marker_model.dart';
+import 'dart:async';
 
 class MapsController {
   GoogleMapController? mapController;
   TextEditingController searchController = TextEditingController();
   Set<Marker> markers = _getMarkers();
   MarkerId? selectedMarker;
-  Marker? selectedMarker2;
+  // Marker? selectedMarker2;
   Map<MarkerId, BitmapDescriptor> markerIcons = {};
+  MarkerId? selectedMarkerId;
+  Marker? selectedMarkerid;
 
   Future<bool> requestLocationPermission() async {
     PermissionStatus permission = await Permission.locationWhenInUse.status;
@@ -59,31 +62,40 @@ class MapsController {
   }
 
   void selectMarker(MarkerId markerId) {
-    selectedMarker = markerId;
-    updateMarkers();
-
-    if (mapController != null) {
-      Marker selectedMarker =
+    setState(() {
+      selectedMarkerId = markerId;
+      selectedMarkerid =
           markers.firstWhere((marker) => marker.markerId == markerId);
+    });
+
+    if (mapController != null && selectedMarkerid != null) {
       mapController!.animateCamera(
-        CameraUpdate.newLatLng(selectedMarker.position),
+        CameraUpdate.newLatLngZoom(
+          selectedMarkerid!.position,
+          20,
+        ),
       );
     }
+
+    updateMarkers(); // Actualiza los marcadores en el mapa con el nuevo marcador seleccionado
   }
 
   void updateMarkers() {
+    markerIcons.clear();
     for (Marker marker in markers) {
       markerIcons[marker.markerId] = BitmapDescriptor.defaultMarkerWithHue(
-        marker.markerId == selectedMarker
+        marker.markerId == selectedMarkerId
             ? BitmapDescriptor.hueYellow
             : BitmapDescriptor.hueRed,
       );
     }
-    markers = markers.map((marker) {
-      return marker.copyWith(
-        iconParam: markerIcons[marker.markerId],
-      );
-    }).toSet();
+    setState(() {
+      markers = markers.map((marker) {
+        return marker.copyWith(
+          iconParam: markerIcons[marker.markerId],
+        );
+      }).toSet();
+    });
   }
 
   void fitBounds() {
@@ -114,13 +126,27 @@ class MapsController {
   }
 
   void clearSelectedMarker() {
-    selectedMarker = null;
+    setState(() {
+      selectedMarker = null;
+      updateMarkers();
+    });
   }
 
-  void clearMarkers() {}
+  void clearMarkers() {
+    setState(() {
+      markers.clear();
+      updateMarkers();
+    });
+  }
 
   static Set<Marker> _getMarkers() {
     List<Marker> markerList = MarkerList.getMarkers();
     return markerList.toSet();
+  }
+
+  void setState(VoidCallback callback) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      callback();
+    });
   }
 }

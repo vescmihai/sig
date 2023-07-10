@@ -3,6 +3,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
 import './../widget/widgets.dart';
 import './../controller/maps_controller.dart';
+import 'dart:async';
 
 class MapsScreen extends StatefulWidget {
   @override
@@ -22,7 +23,6 @@ class _MapsScreenState extends State<MapsScreen> {
   void initState() {
     super.initState();
     _initMap();
-    // _mapsController.updateMarkers();
   }
 
   Future<void> _initMap() async {

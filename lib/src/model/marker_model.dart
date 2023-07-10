@@ -6,17 +6,19 @@ class MarkerSuggestion {
   final MarkerId markerId;
   final String title;
   final String snippet;
+  bool selected;
 
   MarkerSuggestion({
     required this.markerId,
     required this.title,
     required this.snippet,
+    this.selected = false,
   });
 }
 
 class MarkerList {
   static List<Marker> getMarkers() {
-    return [
+    return <Marker>[
       Marker(
         markerId: MarkerId('COMEDOR UNICERSITARIO'),
         position: LatLng(-17.775615, -63.198539),
