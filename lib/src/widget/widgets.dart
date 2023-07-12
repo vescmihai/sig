@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import './../controller/maps_controller.dart';
-import './../view/maps_screen.dart';
+import '../view/maps_screenv2.dart';
 
-class SearchBarW extends StatefulWidget {
+/*class SearchBarW extends StatefulWidget {
   final MapsController mapsController;
 
   SearchBarW(this.mapsController);
@@ -98,7 +98,7 @@ class _MapsViewState extends State<MapsView> {
     );
   }
 }
-
+*/
 class BackgroundImage extends StatelessWidget {
   const BackgroundImage();
 

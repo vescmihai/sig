@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:sig/src/model/marker_model.dart';
 import './../controller/maps_controller.dart';
@@ -19,7 +19,6 @@ class _MapsScreenState extends State<MapsScreen> {
   MarkerId? selectedMarkerId;
   Marker? selectedMarkerid;
   GoogleMapController? mapController;
-
 
   @override
   void dispose() {
@@ -73,9 +72,10 @@ class _MapsScreenState extends State<MapsScreen> {
           onSubmitted: (value) {
             selectMarker;
             setState(() {
-              updateMarkers();
+              //  clearMarkers();
+              //updateMarkers();
               clearSelectedMarker();
-              selectedMarker = null;
+              //selectedMarker = null;
             });
           },
         ),
@@ -87,12 +87,13 @@ class _MapsScreenState extends State<MapsScreen> {
           );
         },
         onSuggestionSelected: (suggestion) {
-          print(suggestion.markerId);
-          updateMarkers();
+          // print(suggestion.markerId);
+          //updateMarkers();
           selectMarker(suggestion.markerId);
           setState(() {
+            clearMarkers();
             clearSelectedMarker();
-            updateMarkers();
+            // updateMarkers();
           });
         },
       ),
@@ -114,9 +115,10 @@ class _MapsScreenState extends State<MapsScreen> {
             selectedMarkerId != null ? Set<Marker>.of([selectedMarkerid!]) : {},
         onTap: (_) {
           setState(() {
-            updateMarkers();
+            //clearMarkers();
+            // updateMarkers();
             clearSelectedMarker();
-            selectedMarker = null;
+            // selectedMarker = null;
           });
         },
       ),
@@ -149,12 +151,19 @@ class _MapsScreenState extends State<MapsScreen> {
     });
   }
 
+  void clearMarkers() {
+    setState(() {
+      markers.clear();
+      updateMarkers();
+    });
+  }
+
   void updateMarkers() {
     markerIcons.clear();
     for (Marker marker in markers) {
       markerIcons[marker.markerId] = BitmapDescriptor.defaultMarkerWithHue(
         marker.markerId == selectedMarkerId
-            ? BitmapDescriptor.hueYellow
+            ? BitmapDescriptor.hueRed
             : BitmapDescriptor.hueRed,
       );
     }
@@ -199,3 +208,4 @@ class _MapsScreenState extends State<MapsScreen> {
     }
   }
 }
+*/

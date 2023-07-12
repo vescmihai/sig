@@ -6,7 +6,7 @@ import 'package:sig/src/view/body_app.dart';
 import 'dart:math' show log2;
 import 'dart:math' as math;
 import 'dart:async';
-import './src/view/maps_screen.dart';
+import 'src/view/maps_screenv2.dart';
 import './src/controller/maps_controller.dart';
 import './src/model/marker_model.dart';
 import '../../src/view/home_screen.dart';

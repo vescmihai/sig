@@ -4,7 +4,7 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:math' show log2;
 import 'dart:math' as math;
-import './../view/maps_screen.dart';
+import 'gerald_screen.dart';
 import './../controller/maps_controller.dart';
 import './../model/marker_model.dart';
 import './../widget/widgets.dart';
