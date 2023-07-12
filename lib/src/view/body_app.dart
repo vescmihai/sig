@@ -15,7 +15,7 @@ class BodyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('SIG APP - FASE III')),
+        appBar: AppBar(title: const Text('SIG APP - FASE IV')),
         body: MapsScreen(),
       ),
     );
