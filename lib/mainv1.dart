@@ -1,9 +1,10 @@
-/*import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:math' show log2;
 import 'dart:math' as math;
+import 'dart:async';
 
 //-------------------------main-------------------------------------
 void main() {
@@ -54,6 +55,7 @@ class _MapsScreenState extends State<MapsScreen> {
       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
         if (snapshot.hasData && snapshot.data == true) {
           return Column(
+            //------------------------------------------------
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -95,7 +97,7 @@ class _MapsScreenState extends State<MapsScreen> {
                   },
                 ),
               ),
-            ],
+            ], //-------------------------------------------------------
           );
         } else {
           return Center(child: CircularProgressIndicator());
@@ -854,4 +856,4 @@ class MarkerSuggestion {
     required this.title,
     required this.snippet,
   });
-}*/
+}

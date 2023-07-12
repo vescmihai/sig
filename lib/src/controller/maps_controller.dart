@@ -85,11 +85,12 @@ class MapsController {
     for (Marker marker in markers) {
       markerIcons[marker.markerId] = BitmapDescriptor.defaultMarkerWithHue(
         marker.markerId == selectedMarkerId
-            ? BitmapDescriptor.hueYellow
+            ? BitmapDescriptor.hueRed
             : BitmapDescriptor.hueRed,
       );
     }
     setState(() {
+      // markerIcons.clear();
       markers = markers.map((marker) {
         return marker.copyWith(
           iconParam: markerIcons[marker.markerId],
