@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'dart:math' show log2;
-import 'dart:math' as math;
+import 'package:geolocator/geolocator.dart' as Geolocator;
 import './../model/marker_model.dart';
 import 'dart:async';
+import 'dart:math' as math;
 
 class MapsController {
   GoogleMapController? mapController;
@@ -90,7 +90,6 @@ class MapsController {
       );
     }
     setState(() {
-
       markers = markers.map((marker) {
         return marker.copyWith(
           iconParam: markerIcons[marker.markerId],
