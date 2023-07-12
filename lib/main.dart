@@ -10,8 +10,14 @@ import './src/view/maps_screen.dart';
 import './src/controller/maps_controller.dart';
 import './src/model/marker_model.dart';
 import '../../src/view/home_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(MyApp());
 }
 

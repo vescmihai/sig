@@ -90,6 +90,7 @@ class MapsController {
       );
     }
     setState(() {
+
       markers = markers.map((marker) {
         return marker.copyWith(
           iconParam: markerIcons[marker.markerId],

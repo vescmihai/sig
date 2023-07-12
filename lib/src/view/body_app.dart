@@ -5,7 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:math' show log2;
 import 'dart:math' as math;
 import '../view/home_screen.dart';
-import '../view/maps_screen.dart';
+import 'maps_screen.dart';
 import '../controller/maps_controller.dart';
 import '../model/marker_model.dart';
 

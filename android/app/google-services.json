@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "106678360063",
+    "project_id": "uagrm-maps",
+    "storage_bucket": "uagrm-maps.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:106678360063:android:506ece624ca581d920b9ca",
+        "android_client_info": {
+          "package_name": "com.example.sig"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "106678360063-q2qnucsoapc8uifgigt2equ42gd7lgmu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWJ9wTn_ZhJjlHrO01tJR9I0HmcrclR2o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "106678360063-q2qnucsoapc8uifgigt2equ42gd7lgmu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "106678360063-tbfnv3j956okt8sj1rkpukbeg07pl8bp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.sig"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
