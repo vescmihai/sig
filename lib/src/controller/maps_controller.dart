@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart' as Geolocator;
-import './../model/marker_model.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
 class MapsController {
   GoogleMapController? mapController;
   TextEditingController searchController = TextEditingController();
-  Set<Marker> markers = _getMarkers();
   MarkerId? selectedMarker;
-  // Marker? selectedMarker2;
   Map<MarkerId, BitmapDescriptor> markerIcons = {};
   MarkerId? selectedMarkerId;
   Marker? selectedMarkerid;
@@ -37,11 +32,11 @@ class MapsController {
       return true;
     }
   }
-
-  List<MarkerSuggestion> getSuggestions(String query) {
+/*
+  Future<List<MarkerSuggestion>> getSuggestions(String query) async {
     List<MarkerSuggestion> suggestions = [];
-
-    for (Marker marker in _getMarkers()) {
+ var markers = await futureMarkers;
+    for (Marker marker in markers) {
       if (marker.infoWindow != null &&
           marker.infoWindow.title != null &&
           marker.infoWindow.snippet != null &&
@@ -138,11 +133,11 @@ class MapsController {
       updateMarkers();
     });
   }
-
-  static Set<Marker> _getMarkers() {
-    List<Marker> markerList = MarkerList.getMarkers();
+*/
+/*   static Future<Set<Marker>> _getMarkers() async {
+    List<Marker> markerList = await MarkerList.getMarkers();
     return markerList.toSet();
-  }
+  }  */
 
   void setState(VoidCallback callback) {
     WidgetsBinding.instance!.addPostFrameCallback((_) {

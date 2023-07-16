@@ -2,30 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:sig/src/model/section_model.dart';
+import 'package:sig/src/widget/carousel_img_widget.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 import './../controller/maps_controller.dart';
 import 'dart:async';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'dart:math' as math;
-import './../model/marker_model.dart';
 
 class MapsScreen extends StatefulWidget {
+  const MapsScreen({super.key});
   @override
-  _MapsScreenState createState() => _MapsScreenState();
+  MapsScreenState createState() => MapsScreenState();
 }
 
-class _MapsScreenState extends State<MapsScreen> {
+class MapsScreenState extends State<MapsScreen> {
   final MapsController _mapsController = MapsController();
-  Set<Marker> markers = _getMarkers();
-  MarkerId? selectedMarker;
+  Future<List<Section>> futureSections = SeccionList.getSections();
   Map<MarkerId, BitmapDescriptor> markerIcons = {};
-  MarkerId? selectedMarkerId;
-  Marker? selectedMarkerid;
+  Map<MarkerId, Marker> activeMarkers = {};
+  Section? selectedSection;
   GoogleMapController? mapController;
   LocationData? currentLocation;
+  final PanelController _panelControlller = PanelController();
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+    //fitBounds();
+  }
 
   @override
   void dispose() {
-    _mapsController.searchController.dispose();
     super.dispose();
   }
 
@@ -39,28 +44,35 @@ class _MapsScreenState extends State<MapsScreen> {
     bool permissionGranted = await _mapsController.requestLocationPermission();
     if (permissionGranted) {
       setState(() {
-        _mapsController.fitBounds();
+        //fitBounds();
       });
     }
+    _panelControlller.hide();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _mapsController.requestLocationPermission(),
-      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-        if (snapshot.hasData && snapshot.data == true) {
-          return Column(
+    return SafeArea(
+      child: SlidingUpPanel(
+        controller: _panelControlller,
+        minHeight: MediaQuery.of(context).size.height * 0.11,
+        maxHeight: MediaQuery.of(context).size.height,
+        snapPoint: 0.5,
+        backdropEnabled: true,
+        backdropOpacity: 0.1,
+        panelSnapping: true,
+        panel: informationPanel(),
+        body: Padding(
+          padding: const EdgeInsets.only(bottom: 80),
+          child: Stack(
             children: [
-              searchBar(),
-              showMap(),
-              currentLocationButton(),
+              Column(children: [searchBar(), showMap()]),
+              Positioned(
+                  bottom: 110, right: 10, child: currentLocationButton()),
             ],
-          );
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
-      },
+          ),
+        ),
+      ),
     );
   }
 
@@ -74,15 +86,10 @@ class _MapsScreenState extends State<MapsScreen> {
             labelText: 'Buscar módulo',
           ),
           onSubmitted: (value) {
-            selectMarker;
-            setState(() {
-              updateMarkers();
-              clearSelectedMarker();
-              selectedMarker = null;
-            });
+            _selectMarker;
           },
         ),
-        suggestionsCallback: _mapsController.getSuggestions,
+        suggestionsCallback: getSuggestions,
         itemBuilder: (context, suggestion) {
           return ListTile(
             title: Text(suggestion.title),
@@ -90,13 +97,7 @@ class _MapsScreenState extends State<MapsScreen> {
           );
         },
         onSuggestionSelected: (suggestion) {
-          print(suggestion.markerId);
-          updateMarkers();
-          selectMarker(suggestion.markerId);
-          setState(() {
-            clearSelectedMarker();
-            updateMarkers();
-          });
+          _selectMarker(suggestion.markerId);
         },
       ),
     );
@@ -105,33 +106,67 @@ class _MapsScreenState extends State<MapsScreen> {
   Expanded showMap() {
     return Expanded(
       child: GoogleMap(
-        onMapCreated: (controller) {
-          mapController = controller;
-          fitBounds();
-        },
+        onMapCreated: _onMapCreated,
         initialCameraPosition: const CameraPosition(
           target: LatLng(-17.775615, -63.198539),
-          zoom: 15,
+          zoom: 14,
         ),
-        markers:
-            selectedMarkerId != null ? Set<Marker>.of([selectedMarkerid!]) : {},
+        markers: Set<Marker>.of(activeMarkers.values),
         onTap: (_) {
           setState(() {
-            updateMarkers();
-            clearSelectedMarker();
-            selectedMarker = null;
+            _panelControlller.hide();
+            _clearSelectedMarker();
           });
         },
       ),
     );
   }
 
+  void _selectMarker(int code) async {
+    var sections = await futureSections;
+
+    Section section = sections.firstWhere((section) => section.code == code);
+    selectedSection = section;
+
+    Marker selectedMarker = Marker(
+        markerId: MarkerId(section.code.toString()),
+        position: LatLng(section.latitud, section.longitud),
+        infoWindow: InfoWindow(
+            title: section.descripcion, snippet: section.latitud.toString()));
+
+    if (mapController != null) {
+      mapController!.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          selectedMarker.position,
+          18,
+        ),
+      );
+      activeMarkers.clear();
+      setState(() {
+        _panelControlller.show();
+        activeMarkers[MarkerId(code.toString())] = selectedMarker;
+      });
+    }
+  }
+
+  void _clearSelectedMarker() {
+    setState(() {
+      activeMarkers.clear();
+    });
+  }
+
+  static Future<Set<Marker>> _getMarkers() async {
+    List<Marker> markerList = await MarkerList.getMarkers();
+    return markerList.toSet();
+  }
+
   Widget currentLocationButton() {
-  return FloatingActionButton(
-    onPressed: _getCurrentLocation,
-    child: Icon(Icons.my_location, color: Colors.red), // Cambio de color a rojo
-  );
-}
+    return FloatingActionButton(
+      onPressed: _getCurrentLocation,
+      child: const Icon(Icons.my_location,
+          color: Colors.red), // Cambio de color a rojo
+    );
+  }
 
   void _getCurrentLocation() async {
     Location location = Location();
@@ -155,60 +190,13 @@ class _MapsScreenState extends State<MapsScreen> {
     }
 
     currentLocation = await location.getLocation();
-    LatLng latLng = LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
+    LatLng latLng =
+        LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
     mapController!.animateCamera(CameraUpdate.newLatLng(latLng));
   }
 
-  void selectMarker(MarkerId markerId) {
-    setState(() {
-      selectedMarkerId = markerId;
-      selectedMarkerid =
-          markers.firstWhere((marker) => marker.markerId == markerId);
-    });
-
-    if (mapController != null && selectedMarkerid != null) {
-      mapController!.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          selectedMarkerid!.position,
-          20,
-        ),
-      );
-    }
-
-    updateMarkers(); // Actualiza los marcadores en el mapa con el nuevo marcador seleccionado
-  }
-
-  void clearSelectedMarker() {
-    setState(() {
-      selectedMarker = null;
-      updateMarkers();
-    });
-  }
-
-  void updateMarkers() {
-  markerIcons.clear();
-  for (Marker marker in markers) {
-    markerIcons[marker.markerId] = BitmapDescriptor.defaultMarkerWithHue(
-      marker.markerId == selectedMarkerId
-          ? BitmapDescriptor.hueRed // Cambio de color a rojo
-          : BitmapDescriptor.hueRed,
-    );
-  }
-  setState(() {
-    markers = markers.map((marker) {
-      return marker.copyWith(
-        iconParam: markerIcons[marker.markerId],
-      );
-    }).toSet();
-  });
-}
-
-  static Set<Marker> _getMarkers() {
-    List<Marker> markerList = MarkerList.getMarkers();
-    return markerList.toSet();
-  }
-
-  void fitBounds() {
+  /* void fitBounds() async {
+    var markers = await futureMarkers;
     if (markers.isNotEmpty && mapController != null) {
       double minLat = double.infinity;
       double maxLat = double.negativeInfinity;
@@ -233,5 +221,52 @@ class _MapsScreenState extends State<MapsScreen> {
           CameraUpdate.newLatLngBounds(bounds, 50);
       mapController!.animateCamera(cameraUpdate);
     }
+  } */
+
+  Future<List<MarkerSuggestion>> getSuggestions(String query) async {
+    List<MarkerSuggestion> suggestions = [];
+    List<Section> sections = await futureSections;
+    for (Section section in sections) {
+      if (section.descripcion.toLowerCase().contains(query.toLowerCase())) {
+        suggestions.add(
+          MarkerSuggestion(
+            markerId: section.code,
+            title: section.descripcion,
+            snippet: section.edificio.toString(),
+          ),
+        );
+      }
+    }
+    return suggestions;
+  }
+
+  Column informationPanel() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
+          Icon(Icons.drag_handle),
+        ]),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 5, 20, 15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                selectedSection?.descripcion ?? ' Sin datos',
+                style: const TextStyle(fontSize: 18),
+              ),
+              Text(
+                selectedSection?.edificio.toString() ?? 'Sin datos',
+                style: const TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+        const CarouselImageWidget(
+          firebaseFolder: '212/',
+        )
+      ],
+    );
   }
 }

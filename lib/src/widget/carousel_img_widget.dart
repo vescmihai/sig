@@ -1,4 +1,3 @@
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:sig/src/service/firebase_service.dart';
@@ -21,7 +20,6 @@ class CarouselImageWidget extends StatelessWidget {
           if (snapshot.hasData) {
             final list = snapshot.data;
             List<GestureDetector> widgets = list!.map((item) {
-              print(item);
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -40,7 +38,7 @@ class CarouselImageWidget extends StatelessWidget {
             return CarouselSlider(
                 items: widgets,
                 options: CarouselOptions(
-                  height: 195,
+                  height: 185,
                   aspectRatio: 16 / 9,
                   viewportFraction: 0.9,
                   enlargeCenterPage: false,
@@ -56,16 +54,17 @@ class CarouselImageWidget extends StatelessWidget {
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else {
-            return Container(alignment: Alignment.center, child: CircularProgressIndicator());
+            return Container(alignment: Alignment.center, child: const CircularProgressIndicator());
           }
         });
   }
 
   CachedNetworkImage imageWidget(String imageUrl) {
     return CachedNetworkImage(
-      fadeInDuration: Duration(milliseconds: 250),
+      fadeInDuration: const Duration(milliseconds: 250),
         alignment: Alignment.center,
         imageUrl: imageUrl,
+        width: 330,
         fit: BoxFit.cover,
         errorWidget: (context, url, error) => Container(
             alignment: Alignment.center, child: const Icon(Icons.error)));

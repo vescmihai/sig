@@ -520,22 +520,6 @@
         "estado": "A"
     },
     {
-        "code": 0,
-        "descripcion": "Modulo 201",
-        "tipo": "M",
-        "cod_edificio": 201,
-        "longitud": -63.1934977,
-        "latitud": -17.7747998,
-        "recursos": "Sin Funcionamiento",
-        "estado": "B"
-    },
-    {
-        "code": 0,
-        "descripcion": "Modulo de comedor",
-        "longitud": -63.1944996,
-        "latitud": -17.774782
-    },
-    {
         "code": 22401,
         "capcacidad_max": 40,
         "piso": 0,
@@ -2248,42 +2232,6 @@
         "longitud": -63.195541,
         "latitud": -17.775456,
         "recursos": "sillas,mesas y aire acondicionado",
-        "estado": "A"
-    },
-    {
-        "code": 0,
-        "piso": 0,
-        "descripcion": "Estacionamiento(Parqueo Docentes Facultad de Ciencias)",
-        "tipo": "E",
-        "cod_edificio": 0,
-        "seccion": 0,
-        "longitud": -63.1956,
-        "latitud": -17.775043,
-        "recursos": "Espacio para estacionar Autos",
-        "estado": "A"
-    },
-    {
-        "code": 0,
-        "piso": 0,
-        "descripcion": "Biblioteca de tecnologia UAGRM",
-        "tipo": "B",
-        "cod_edificio": 0,
-        "seccion": 0,
-        "longitud": -63.195335,
-        "latitud": -17.775094,
-        "recursos": "Libros,mesas y sillas",
-        "estado": "A"
-    },
-    {
-        "code": 0,
-        "piso": 1,
-        "descripcion": "Biblioteca de tecnologia UAGRM",
-        "tipo": "B",
-        "cod_edificio": 0,
-        "seccion": 0,
-        "longitud": -63.195339,
-        "latitud": -17.775091,
-        "recursos": "Libros,mesas y sillas",
         "estado": "A"
     }
 ]

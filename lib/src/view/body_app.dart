@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'dart:math' show log2;
-import 'dart:math' as math;
-import '../view/home_screen.dart';
+import 'package:sig/src/view/example.dart';
 import 'gerald_screen.dart';
-import 'maps_screenv2.dart';
-import '../controller/maps_controller.dart';
-import '../model/marker_model.dart';
 
 class BodyApp extends StatelessWidget {
+  const BodyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(title: const Text('SIG APP - FASE IV')),
-        body: MapsScreen(),
+        body: const MapsScreen(),
       ),
     );
   }
