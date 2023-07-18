@@ -1,7 +1,7 @@
 [
     {
         "code": 21201,
-        "capcacidad_max": 120,
+        "capacidad_max": 120,
         "piso": 0,
         "descripcion": "DIRECCION",
         "tipo": "A",

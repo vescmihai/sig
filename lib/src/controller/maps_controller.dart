@@ -140,7 +140,7 @@ class MapsController {
   }  */
 
   void setState(VoidCallback callback) {
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       callback();
     });
   }

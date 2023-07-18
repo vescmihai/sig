@@ -12,6 +12,9 @@ class Section {
   final double longitud;
   final double latitud;
   final String? recursos;
+  final String? piso;
+  final int? capacidadMax;
+  final int? area;
 
   Section({
     required this.code,
@@ -22,6 +25,9 @@ class Section {
     required this.longitud,
     required this.latitud,
     this.recursos,
+    this.piso,
+    this.capacidadMax,
+    this.area,
   });
 }
 
@@ -38,21 +44,45 @@ class SeccionList {
     List<Section> locations = [];
 
     for (var item in sectionsJson) {
-      var edificio = edificiosJson
-          .firstWhere((record) => record['code'].toString() == item['cod_edificio'].toString());
+      String pisoString = '';
+      switch (item['piso']) {
+        case 0:
+          pisoString = 'Planta baja';
+          break;
+        case 1:
+          pisoString = '1er piso';
+          break;
+        case 2:
+          pisoString = ' 2do piso';
+          break;
+        case 3:
+          pisoString = '3er piso';
+          break;
+        case 4:
+          pisoString = '4to piso';
+          break;
+        case 5:
+          pisoString = '5to piso';
+          break;
+        default:
+      }
 
-        Section seccion = Section(
-          code: item['code'],
-          longitud: item['longitud'],
-          latitud: item['latitud'],
-          descripcion: item['descripcion'].toString(),
-          codEdificio: int.parse(item['cod_edificio'].toString()),
-          edificio: edificio['descripcion'].toString(),
-          recursos: item['recursos'].toString(),
-          tipo: item['tipo'].toString(),
-        );
-        locations.add(seccion);
-      
+      var edificio = edificiosJson.firstWhere((record) =>
+          record['code'].toString() == item['cod_edificio'].toString());
+
+      Section seccion = Section(
+        code: item['code'],
+        longitud: item['longitud'],
+        latitud: item['latitud'],
+        descripcion: item['descripcion'].toString(),
+        codEdificio: int.parse(item['cod_edificio'].toString()),
+        edificio: edificio['descripcion'].toString(),
+        piso: pisoString,
+        recursos: item['recursos'].toString(),
+        capacidadMax: item['capacidad_max'],
+        tipo: item['tipo'].toString(),
+      );
+      locations.add(seccion);
     }
     return locations;
   }

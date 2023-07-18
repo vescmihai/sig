@@ -1,60 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:sig/src/service/firebase_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:panorama/panorama.dart';
 
 class ShowImage extends StatelessWidget {
   final String imageUrl;
-  const ShowImage({Key? key, required this.imageUrl}) : super(key: key);
+  final bool isPanorama;
+  const ShowImage({Key? key, required this.imageUrl, required this.isPanorama})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: SafeArea(
-            child: Center(
-                child: InteractiveViewer(
-                    boundaryMargin: const EdgeInsets.all(10),
-                    minScale: 0.5,
-                    maxScale: 2.5,
-                    constrained: false,
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height,
-                      alignment: Alignment.center,
-                      child: CachedNetworkImage(
-                        alignment: Alignment.center,
-                        width: MediaQuery.of(context).size.width,
-                        imageUrl: imageUrl,
-                        fit: BoxFit.cover,
-                        errorWidget: (context, url, error) => Container(
-                          alignment: Alignment.center,
-                          child: const Icon(Icons.error),
-                        ),
-                      ),
-                    )))));
+    if (isPanorama) {
+      return Scaffold(body: SafeArea(child: panoramaImage()));
+    } else {
+      return Scaffold(body: SafeArea(child: normalImage(context)));
+    }
+  }
+
+  Center normalImage(BuildContext context) {
+    return Center(
+      child: InteractiveViewer(
+          boundaryMargin: const EdgeInsets.all(10),
+          minScale: 0.5,
+          maxScale: 2.5,
+          constrained: false,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            alignment: Alignment.center,
+            child: CachedNetworkImage(
+              alignment: Alignment.center,
+              width: MediaQuery.of(context).size.width,
+              imageUrl: imageUrl,
+              fit: BoxFit.cover,
+              errorWidget: (context, url, error) => Container(
+                alignment: Alignment.center,
+                child: const Icon(Icons.error),
+              ),
+            ),
+          )),
+    );
+  }
+
+  Center panoramaImage() {
+    return Center(
+        child: Panorama(
+      croppedArea: const Rect.fromLTRB(0, 0.1, 1, 0.9),
+      animSpeed: 0.8,
+      sensitivity: 1.6,
+      zoom: 0,
+      maxZoom: 1.2,
+      child: Image.network(imageUrl),
+    ));
   }
 }
-
-/* 
-FutureBuilder<String>(
-                  future: firebaseService.getUrlImagen(imageUrl),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      if (snapshot.data == 'no') {
-                        return Text('no hay data');
-                      } else {
-                        return Image.network(
-                          snapshot.data!,
-                          width: MediaQuery.of(context).size.width,
-                          fit: BoxFit.cover,
-                        );
-                      }
-                    } else {
-                      return Container(
-                          padding: const EdgeInsets.all(17),
-                          height: 50,
-                          width: 50,
-                          child: const CircularProgressIndicator());
-                    }
-                  },
-                ) */

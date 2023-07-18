@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sig/src/utils/app_theme.dart';
 import 'package:sig/src/view/body_app.dart';
 import '../../src/view/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: HomeScreen(),
       debugShowCheckedModeBanner: false,
+      theme: AppThemeData.lightTheme,
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/map':

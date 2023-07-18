@@ -3,7 +3,9 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:sig/src/model/section_model.dart';
+import 'package:sig/src/service/firebase_service.dart';
 import 'package:sig/src/widget/carousel_img_widget.dart';
+import 'package:sig/src/widget/inf_panel_widget.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import './../controller/maps_controller.dart';
 import 'dart:async';
@@ -55,13 +57,13 @@ class MapsScreenState extends State<MapsScreen> {
     return SafeArea(
       child: SlidingUpPanel(
         controller: _panelControlller,
-        minHeight: MediaQuery.of(context).size.height * 0.11,
+        minHeight: MediaQuery.of(context).size.height * 0.115,
         maxHeight: MediaQuery.of(context).size.height,
         snapPoint: 0.5,
         backdropEnabled: true,
         backdropOpacity: 0.1,
         panelSnapping: true,
-        panel: informationPanel(),
+        panel: InformationPanelW(selectedSection: selectedSection),
         body: Padding(
           padding: const EdgeInsets.only(bottom: 80),
           child: Stack(
@@ -132,7 +134,8 @@ class MapsScreenState extends State<MapsScreen> {
         markerId: MarkerId(section.code.toString()),
         position: LatLng(section.latitud, section.longitud),
         infoWindow: InfoWindow(
-            title: section.descripcion, snippet: section.latitud.toString()));
+            title: section.descripcion,
+            snippet: 'Edificio: ${section.codEdificio}'));
 
     if (mapController != null) {
       mapController!.animateCamera(
@@ -240,33 +243,5 @@ class MapsScreenState extends State<MapsScreen> {
     return suggestions;
   }
 
-  Column informationPanel() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
-          Icon(Icons.drag_handle),
-        ]),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 5, 20, 15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                selectedSection?.descripcion ?? ' Sin datos',
-                style: const TextStyle(fontSize: 18),
-              ),
-              Text(
-                selectedSection?.edificio.toString() ?? 'Sin datos',
-                style: const TextStyle(fontSize: 18, color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-        const CarouselImageWidget(
-          firebaseFolder: '212/',
-        )
-      ],
-    );
-  }
+  
 }

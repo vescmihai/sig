@@ -18,9 +18,9 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            BackgroundImage(), // Aquí puedes proporcionar una URL de imagen si deseas
+            const BackgroundImage(), // Aquí puedes proporcionar una URL de imagen si deseas
             ElevatedButton(
-              child: Text('Iniciar'),
+              child: const Text('Iniciar'),
               onPressed: () {
                 Navigator.pushNamed(context, '/map');
               },
