@@ -104,7 +104,7 @@ class MapsScreenState extends State<MapsScreen> {
       ),
     );
   }
-
+  
   Expanded showMap() {
     return Expanded(
       child: GoogleMap(
@@ -123,6 +123,60 @@ class MapsScreenState extends State<MapsScreen> {
       ),
     );
   }
+   /* mostrando casa menos modulo
+  Expanded showMap() {
+  return Expanded(
+    child: GoogleMap(
+      onMapCreated: (controller) {
+        mapController = controller;
+        fitBounds();
+      },
+      initialCameraPosition: const CameraPosition(
+        target: LatLng(-17.775615, -63.198539),
+        zoom: 15,
+      ),
+      markers: {
+        if (currentLocationMarker != null) currentLocationMarker!,
+      },
+      onTap: (_) {
+        setState(() {
+          updateMarkers();
+          clearSelectedMarker();
+          selectedMarker = null;
+        });
+      },
+    ),
+  );
+}
+*/
+
+//original mostrando modulos menos casa
+/*
+  Expanded showMap() {
+    return Expanded(
+      child: GoogleMap(
+        onMapCreated: (controller) {
+          mapController = controller;
+          fitBounds();
+        },
+        initialCameraPosition: const CameraPosition(
+          target: LatLng(-17.775615, -63.198539),
+          zoom: 15,
+        ),
+        markers:
+        
+            selectedMarkerId != null ? Set<Marker>.of([selectedMarkerid!]) : {},
+        onTap: (_) {
+          setState(() {
+            updateMarkers();
+            clearSelectedMarker();
+            selectedMarker = null;
+          });
+        },
+      ),
+    );
+  }
+  */
 
   void _selectMarker(int code) async {
     var sections = await futureSections;
@@ -172,31 +226,43 @@ class MapsScreenState extends State<MapsScreen> {
   }
 
   void _getCurrentLocation() async {
-    Location location = Location();
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
+  Location location = Location();
+  bool serviceEnabled;
+  PermissionStatus permissionGranted;
 
-    serviceEnabled = await location.serviceEnabled();
+  serviceEnabled = await location.serviceEnabled();
+  if (!serviceEnabled) {
+    serviceEnabled = await location.requestService();
     if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-      if (!serviceEnabled) {
-        return;
-      }
+      return;
     }
-
-    permissionGranted = await location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) {
-        return;
-      }
-    }
-
-    currentLocation = await location.getLocation();
-    LatLng latLng =
-        LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
-    mapController!.animateCamera(CameraUpdate.newLatLng(latLng));
   }
+
+  permissionGranted = await location.hasPermission();
+  if (permissionGranted == PermissionStatus.denied) {
+    permissionGranted = await location.requestPermission();
+    if (permissionGranted != PermissionStatus.granted) {
+      return;
+    }
+  }
+
+  currentLocation = await location.getLocation();
+  LatLng latLng =
+      LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
+  
+  Marker currentLocationMarker = Marker(
+    markerId: MarkerId("current_location"), // Nuevo MarkerId
+    position: latLng,
+    icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed), // Icono en rojo
+  );
+  
+  setState(() {
+    activeMarkers[MarkerId("current_location")] = currentLocationMarker;
+  });
+
+  mapController!.animateCamera(CameraUpdate.newLatLngZoom(latLng, 15));
+}
+
 
   /* void fitBounds() async {
     var markers = await futureMarkers;
