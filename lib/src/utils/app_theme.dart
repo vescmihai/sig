@@ -6,7 +6,7 @@ class AppThemeData {
   AppThemeData._();
   static final ThemeData lightTheme = ThemeData(
     scaffoldBackgroundColor: Colors.white,
-    primaryColor: Color(0xFF007EE7),
+    primaryColor: const Color(0xFF007EE7),
     primaryColorDark: Color(0xFFEFF5FC),
     hoverColor: Colors.white60,
     dividerColor: Colors.grey[200],
@@ -18,7 +18,7 @@ class AppThemeData {
       //titleTextStyle: TextStyle(fontSize: 20),
       iconTheme: const IconThemeData(color: Colors.blue),
       systemOverlayStyle:
-          SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark),
+          const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark),
     ),
     textTheme: const TextTheme(
       titleLarge: TextStyle(color: Colors.black,fontSize: 20.0),

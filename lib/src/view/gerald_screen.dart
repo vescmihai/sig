@@ -3,8 +3,6 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:sig/src/model/section_model.dart';
-import 'package:sig/src/service/firebase_service.dart';
-import 'package:sig/src/widget/carousel_img_widget.dart';
 import 'package:sig/src/widget/inf_panel_widget.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import './../controller/maps_controller.dart';
@@ -47,15 +45,19 @@ class MapsScreenState extends State<MapsScreen> {
     if (permissionGranted) {
       setState(() {
         //fitBounds();
+        _panelControlller.hide();
       });
     }
-    _panelControlller.hide();
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: SlidingUpPanel(
+        borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(15), topRight: Radius.circular(15)),
+        parallaxEnabled: true,
+        defaultPanelState: PanelState.CLOSED,
         controller: _panelControlller,
         minHeight: MediaQuery.of(context).size.height * 0.115,
         maxHeight: MediaQuery.of(context).size.height,
@@ -85,7 +87,7 @@ class MapsScreenState extends State<MapsScreen> {
         textFieldConfiguration: TextFieldConfiguration(
           controller: _mapsController.searchController,
           decoration: const InputDecoration(
-            labelText: 'Buscar módulo',
+            labelText: 'Buscar modulo, oficina, aula...',
           ),
           onSubmitted: (value) {
             _selectMarker;
@@ -113,6 +115,9 @@ class MapsScreenState extends State<MapsScreen> {
           target: LatLng(-17.775615, -63.198539),
           zoom: 14,
         ),
+        compassEnabled: true,
+        myLocationButtonEnabled: true,
+        myLocationEnabled: true,
         markers: Set<Marker>.of(activeMarkers.values),
         onTap: (_) {
           setState(() {
@@ -133,6 +138,7 @@ class MapsScreenState extends State<MapsScreen> {
     Marker selectedMarker = Marker(
         markerId: MarkerId(section.code.toString()),
         position: LatLng(section.latitud, section.longitud),
+        onTap:() => _panelControlller.show(),
         infoWindow: InfoWindow(
             title: section.descripcion,
             snippet: 'Edificio: ${section.codEdificio}'));
@@ -146,8 +152,8 @@ class MapsScreenState extends State<MapsScreen> {
       );
       activeMarkers.clear();
       setState(() {
-        _panelControlller.show();
         activeMarkers[MarkerId(code.toString())] = selectedMarker;
+        _panelControlller.show();
       });
     }
   }
@@ -156,11 +162,6 @@ class MapsScreenState extends State<MapsScreen> {
     setState(() {
       activeMarkers.clear();
     });
-  }
-
-  static Future<Set<Marker>> _getMarkers() async {
-    List<Marker> markerList = await MarkerList.getMarkers();
-    return markerList.toSet();
   }
 
   Widget currentLocationButton() {
@@ -230,7 +231,9 @@ class MapsScreenState extends State<MapsScreen> {
     List<MarkerSuggestion> suggestions = [];
     List<Section> sections = await futureSections;
     for (Section section in sections) {
-      if (section.descripcion.toLowerCase().contains(query.toLowerCase())) {
+      if (section.descripcion.toLowerCase().contains(query.toLowerCase()) ||
+          section.codEdificio.toString().contains(query.toLowerCase()) ||
+          section.edificio!.toLowerCase().contains(query.toLowerCase())) {
         suggestions.add(
           MarkerSuggestion(
             markerId: section.code,
@@ -242,6 +245,4 @@ class MapsScreenState extends State<MapsScreen> {
     }
     return suggestions;
   }
-
-  
 }

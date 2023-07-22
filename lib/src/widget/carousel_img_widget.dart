@@ -41,9 +41,6 @@ class CarouselImageWidget extends StatelessWidget {
                   enableInfiniteScroll: false,
                   reverse: false,
                   autoPlay: false,
-                  autoPlayInterval: const Duration(seconds: 3),
-                  autoPlayAnimationDuration: const Duration(milliseconds: 800),
-                  autoPlayCurve: Curves.fastOutSlowIn,
                   scrollDirection: Axis.horizontal,
                 ));
           } else if (snapshot.hasError) {

@@ -19,15 +19,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: HomeScreen(),
+      home: const HomeScreen(),
       debugShowCheckedModeBanner: false,
       theme: AppThemeData.lightTheme,
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/map':
-            return MaterialPageRoute(builder: (context) => BodyApp());
+            return MaterialPageRoute(builder: (context) => const BodyApp());
           default:
-            return MaterialPageRoute(builder: (context) => HomeScreen());
+            return MaterialPageRoute(builder: (context) => const HomeScreen());
         }
       },
     );

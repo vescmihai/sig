@@ -8,20 +8,22 @@ class ShowImage extends StatelessWidget {
   const ShowImage({Key? key, required this.imageUrl, required this.isPanorama})
       : super(key: key);
 
+ 
   @override
   Widget build(BuildContext context) {
     if (isPanorama) {
       return Scaffold(body: SafeArea(child: panoramaImage()));
     } else {
-      return Scaffold(body: SafeArea(child: normalImage(context)));
+      return Scaffold(backgroundColor: Colors.black, body: SafeArea(child: normalImage(context)));
     }
   }
 
   Center normalImage(BuildContext context) {
     return Center(
       child: InteractiveViewer(
-          boundaryMargin: const EdgeInsets.all(10),
-          minScale: 0.5,
+          boundaryMargin: const EdgeInsets.all(0),
+          panAxis: PanAxis.horizontal,
+          minScale: 1,
           maxScale: 2.5,
           constrained: false,
           child: Container(
@@ -45,7 +47,9 @@ class ShowImage extends StatelessWidget {
   Center panoramaImage() {
     return Center(
         child: Panorama(
-      croppedArea: const Rect.fromLTRB(0, 0.1, 1, 0.9),
+      croppedArea: const Rect.fromLTRB(0, 0.24, 1, 0.76),
+      maxLatitude: 9,
+      minLatitude: -9,
       animSpeed: 0.8,
       sensitivity: 1.6,
       zoom: 0,
