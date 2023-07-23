@@ -8,10 +8,6 @@ class InformationPanelW extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return informationPanel();
-  }
-
-  Column informationPanel() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

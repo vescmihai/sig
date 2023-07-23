@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
-import 'dart:math' as math;
 
 class MapsController {
   GoogleMapController? mapController;

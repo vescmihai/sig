@@ -109,7 +109,7 @@ class BackgroundImage extends StatelessWidget {
       child: Container(
         width: 200,
         height: 200,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/siguagrm.png'),
             fit: BoxFit.cover,

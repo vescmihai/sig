@@ -16,19 +16,21 @@ class _FirebaseService {
     return img;
   }
 
+  ///Retorna una lista con los nombres de todos archivos.
   Future<List<String>> getAll(String folder) async {
     Reference ref = FirebaseStorage.instance.ref().child(folder);
     ListResult list = await ref.listAll();
 
     List<String> urls = [];
     for (Reference item in list.items) {
-      String url =
-          await item.getDownloadURL(); // obtener la url de cada elemento
-      urls.add(url); // agregar la url a la lista
+      String url = await item.getDownloadURL();
+      urls.add(url);
     }
     return urls;
   }
 
+  ///Retorna un Map con todas las urls de las imagenes encontradas del edificio y secccion especificada.
+  ///Se especifica en cada imagen si es o no una imagen 360.
   Future<Map<String, bool>> getImgBySection(
       String edificioCode, String sectionCode) async {
     List<MapEntry<String, bool>> urls = [];

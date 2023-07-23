@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sig/src/utils/app_theme.dart';
 import 'gerald_screen.dart';
 
 class BodyApp extends StatelessWidget {
@@ -7,13 +6,10 @@ class BodyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: AppThemeData.lightTheme,
-      home: Scaffold(
+    return Scaffold(
         appBar: AppBar(title: const Text('SIG APP - FASE IV')),
+        //resizeToAvoidBottomInset: false,
         body: const MapsScreen(),
-      ),
     );
   }
 }
