@@ -51,6 +51,9 @@ dependencies:
   firebase_core: ^2.14.0
   google_fonts: ^4.0.3
   panorama: ^0.4.1
+  google_map_polyline_new: ^0.3.0+2
+  intl: ^0.18.1
+  speech_to_text: ^5.0.0
 
 dev_dependencies:
   flutter_test:
