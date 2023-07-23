@@ -250,15 +250,15 @@ class MapsScreenState extends State<MapsScreen> {
         var duration = legs[0]['duration']['text'];
 
         var distanceValue = double.parse(distance.replaceAll(' km', ''));
-        var durationValue = int.parse(duration.replaceAll(' mins', ''));
+        var durationValue = parseDuration(duration);
 
         setState(() {
           if (mode == RouteMode.driving) {
             _drivingDistance = distanceValue;
-            _drivingDuration = Duration(minutes: durationValue);
+            _drivingDuration = durationValue;
           } else if (mode == RouteMode.walking) {
             _walkingDistance = distanceValue;
-            _walkingDuration = Duration(minutes: durationValue);
+            _walkingDuration = durationValue;
           }
         });
       } else {
@@ -266,6 +266,40 @@ class MapsScreenState extends State<MapsScreen> {
       }
     }
   }
+
+  Duration parseDuration(String duration) {
+    final durationParts = duration.split(' ');
+
+    int hours = 0;
+    int minutes = 0;
+
+    for (int i = 0; i < durationParts.length; i += 2) {
+      final value = int.parse(durationParts[i]);
+      final unit = durationParts[i + 1];
+
+      switch (unit) {
+        case 'day':
+        case 'days':
+          hours += value * 24;
+          break;
+        case 'hour':
+        case 'hours':
+          hours += value;
+          break;
+        case 'min':
+        case 'mins':
+          minutes += value;
+          break;
+        default:
+          throw Exception('Error de duracion $unit');
+      }
+    }
+
+    return Duration(hours: hours, minutes: minutes);
+  }
+
+
+
 
   void _selectMarker(int code) async {
     var sections = await futureSections;
@@ -325,20 +359,24 @@ class MapsScreenState extends State<MapsScreen> {
   }
 
   String formatDuration(Duration d) {
-    String result = "";
+      String result = "";
 
-    if(d.inHours > 0){
-      result += d.inHours.toString() + "h ";
-    }
-    if(d.inMinutes.remainder(60) > 0){
-      result += d.inMinutes.remainder(60).toString() + " min";
-    }
-    if(d.inSeconds.remainder(60) > 0){
-      result += d.inSeconds.remainder(60).toString() + " seg";
-    }
+      if(d.inDays > 0){
+          result += d.inDays.toString() + "d ";
+      }
+      if(d.inHours.remainder(24) > 0){
+          result += d.inHours.remainder(24).toString() + "h ";
+      }
+      if(d.inMinutes.remainder(60) > 0){
+          result += d.inMinutes.remainder(60).toString() + " min";
+      }
+      if(d.inSeconds.remainder(60) > 0){
+          result += d.inSeconds.remainder(60).toString() + " seg";
+      }
 
-    return result;
+      return result;
   }
+
 
 
    _addPolyline(List<LatLng>? _coordinates) {
