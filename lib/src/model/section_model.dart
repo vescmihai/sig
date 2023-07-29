@@ -66,6 +66,8 @@ class SeccionList {
           pisoString = '5to piso';
           break;
         default:
+          pisoString = item['piso'];
+          break;
       }
 
       switch (item['tipo'].toString().toUpperCase()) {
@@ -80,6 +82,9 @@ class SeccionList {
           break;
         case 'O':
           tipo = 'Oficina';
+          break;
+        case 'B':
+          tipo = 'Baño';
           break;
         default:
           tipo = item['tipo'].toString();

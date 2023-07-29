@@ -22,11 +22,8 @@ class MarkerList {
   static Future<List<Marker>> getMarkers() async {
     final sectionJsonString =
         await rootBundle.loadString('assets/data/secciones.json');
-    final edificiosJsonString =
-        await rootBundle.loadString('assets/data/edificios.json');
 
     List<dynamic> sectionsJson = json.decode(sectionJsonString);
-    List<dynamic> edificiosJson = json.decode(edificiosJsonString);
 
     List<Marker> markers = [];
 
