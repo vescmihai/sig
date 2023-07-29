@@ -51,6 +51,8 @@ dependencies:
   panorama: ^0.4.1
   google_map_polyline_new: ^0.3.0+2
   intl: ^0.18.1
+  speech_to_text: ^6.3.0
+  diacritic: ^0.1.4
   speech_to_text: ^5.0.0
   google_maps_webservice: ^0.0.19
   google_api_headers: ^1.6.0

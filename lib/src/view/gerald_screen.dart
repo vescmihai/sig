@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -16,6 +17,7 @@ import 'package:google_map_polyline_new/google_map_polyline_new.dart';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:diacritic/diacritic.dart';
 import 'package:uuid/uuid.dart';
 
 class MapsScreen extends StatefulWidget {
@@ -29,6 +31,7 @@ class MapsScreenState extends State<MapsScreen> {
   Future<List<Section>> futureSections = SeccionList.getSections();
   Map<MarkerId, BitmapDescriptor> markerIcons = {};
   Map<MarkerId, Marker> activeMarkers = {};
+  Map<MarkerId, Marker> activeMarker = {};
   Section? selectedSection;
   final _searchOrigenController = TextEditingController();
   GoogleMapController? mapController;
@@ -95,6 +98,16 @@ class MapsScreenState extends State<MapsScreen> {
                     currentLocation!.longitude!,
                     selectedSection!.latitud,
                     selectedSection!.longitud);
+              } else if (selectedSection != null &&
+                  activeMarker.containsKey(MarkerId('user_marker'))) {
+                LatLng userMarkerPosition =
+                    activeMarker[MarkerId('user_marker')]!.position;
+                _getPolylinesWithLocation(
+                  userMarkerPosition.latitude,
+                  userMarkerPosition.longitude,
+                  selectedSection!.latitud,
+                  selectedSection!.longitud,
+                );
               }
             });
           },
@@ -111,6 +124,16 @@ class MapsScreenState extends State<MapsScreen> {
                     currentLocation!.longitude!,
                     selectedSection!.latitud,
                     selectedSection!.longitud);
+              } else if (selectedSection != null &&
+                  activeMarker.containsKey(MarkerId('user_marker'))) {
+                LatLng userMarkerPosition =
+                    activeMarker[MarkerId('user_marker')]!.position;
+                _getPolylinesWithLocation(
+                  userMarkerPosition.latitude,
+                  userMarkerPosition.longitude,
+                  selectedSection!.latitud,
+                  selectedSection!.longitud,
+                );
               }
             });
           },
@@ -119,6 +142,41 @@ class MapsScreenState extends State<MapsScreen> {
     );
   }
 
+//falta actualizar la informacion en tiempo y distancia con el userMarker-------------------------
+  void _onMapTap(LatLng position) {
+    setState(() {
+      Marker userMarker = Marker(
+        markerId: MarkerId('user_marker'),
+        position: position,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+      );
+      activeMarker[MarkerId('user_marker')] = userMarker;
+
+      // Update the markers on the map by creating a new set with the updated markers.
+      Set<Marker> updatedMarkers = Set.of(activeMarkers.values)
+        ..addAll(activeMarker.values);
+      activeMarkers =
+          Map.fromIterable(updatedMarkers, key: (marker) => marker.markerId);
+
+      // Now call the route calculation function after the user marker is added to the map.
+      if (selectedSection != null &&
+          activeMarker.containsKey(MarkerId('user_marker'))) {
+        LatLng userMarkerPosition =
+            activeMarker[MarkerId('user_marker')]!.position;
+        _getPolylinesWithLocation(
+          userMarkerPosition.latitude,
+          userMarkerPosition.longitude,
+          selectedSection!.latitud,
+          selectedSection!.longitud,
+        );
+
+        // Update route info based on the selected mode
+        _updateRouteInfo(_routeMode);
+      }
+    });
+  }
+
+//------------------------------------------------------------------------------------------------
   Future<void> _searchByVoice() async {
     bool available = await _speechToText.initialize(
       onError: (val) => print('onError: $val'),
@@ -127,9 +185,17 @@ class MapsScreenState extends State<MapsScreen> {
     print('Disponibilidad de SpeechToText: $available'); // depuración
     if (available) {
       _speechToText.listen(
-        onResult: (val) => setState(() {
-          _mapsController.searchController.text = val.recognizedWords;
-        }),
+        onResult: (val) async {
+          String recognizedWords = val.recognizedWords.toLowerCase();
+          List<MarkerSuggestion> suggestions =
+              await getSuggestions(recognizedWords);
+          _mapsController.searchController.text = recognizedWords;
+          // No necesitas una variable "filteredSuggestions",
+          // simplemente usa la lista "suggestions" directamente.
+          setState(() {
+            // La lista "suggestions" se mostrará en el TypeAheadField.
+          });
+        },
         listenFor: Duration(seconds: 10), // tiempo límite para escuchar
         pauseFor: Duration(seconds: 5), // tiempo límite para pausar
         partialResults: true, // Puedes activar resultados parciales.
@@ -182,6 +248,7 @@ class MapsScreenState extends State<MapsScreen> {
           padding: const EdgeInsets.only(bottom: 80),
           child: Column(
             children: [
+
               searchOrigenBar(),
               searchBar(),
               buildRouteModeButtons(),
@@ -204,7 +271,7 @@ class MapsScreenState extends State<MapsScreen> {
       ),
     );
   }
-
+  
   AnimatedSize searchOrigenBar() {
     return AnimatedSize(
       duration: const Duration(milliseconds: 200),
@@ -430,7 +497,38 @@ class MapsScreenState extends State<MapsScreen> {
           ),
         ],
       ),
-    );
+      compassEnabled: true,
+      myLocationButtonEnabled: true,
+      myLocationEnabled: true,
+      markers: Set<Marker>.of(activeMarkers.values)
+          .union(Set<Marker>.of(activeMarker.values)),
+      polylines: Set<Polyline>.of(_polylines.values),
+      onTap: (LatLng position) {
+        setState(() {
+          _panelControlller.hide();
+
+          _onMapTap(position);
+        });
+      },
+      onLongPress: (LatLng position) {
+        setState(() {
+          _clearAllMarkers();
+        });
+      },
+    ));
+  }
+
+  void _clearAllMarkers() {
+    setState(() {
+      activeMarker.clear();
+      activeMarkers.clear();
+      currentLocation = null;
+      _polylines.clear();
+      _drivingDistance = 0;
+      _drivingDuration = Duration();
+      _walkingDistance = 0;
+      _walkingDuration = Duration();
+    });
   }
 
   void _updateRouteInfo(RouteMode mode) async {
@@ -670,7 +768,7 @@ class MapsScreenState extends State<MapsScreen> {
         return;
       }
     }
-
+    activeMarker.clear();
     currentLocation = await location.getLocation();
     LatLng latLng =
         LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
@@ -679,11 +777,11 @@ class MapsScreenState extends State<MapsScreen> {
       markerId: MarkerId("current_location"), // Nuevo MarkerId
       position: latLng,
       icon: BitmapDescriptor.defaultMarkerWithHue(
-          BitmapDescriptor.hueRed), // Icono en rojo
+          BitmapDescriptor.hueBlue), // Icono en rojo
     );
 
     setState(() {
-      activeMarkers[MarkerId("current_location")] = currentLocationMarker;
+      activeMarker[MarkerId("current_location")] = currentLocationMarker;
     });
 
     mapController!.animateCamera(CameraUpdate.newLatLngZoom(latLng, 15));
@@ -692,10 +790,19 @@ class MapsScreenState extends State<MapsScreen> {
   Future<List<MarkerSuggestion>> getSuggestions(String query) async {
     List<MarkerSuggestion> suggestions = [];
     List<Section> sections = await futureSections;
+    String normalizedQuery =
+        removeDiacritics(query.toLowerCase()); // Remueve tildes
     for (Section section in sections) {
-      if (section.descripcion.toLowerCase().contains(query.toLowerCase()) ||
-          section.codEdificio.toString().contains(query.toLowerCase()) ||
-          section.edificio!.toLowerCase().contains(query.toLowerCase())) {
+      String normalizedDescription =
+          removeDiacritics(section.descripcion.toLowerCase());
+      String normalizedEdificio =
+          removeDiacritics(section.edificio!.toLowerCase());
+      String normalizedCodEdificio =
+          removeDiacritics(section.codEdificio.toString().toLowerCase());
+
+      if (normalizedDescription.contains(normalizedQuery) ||
+          normalizedCodEdificio.contains(normalizedQuery) ||
+          normalizedEdificio.contains(normalizedQuery)) {
         suggestions.add(
           MarkerSuggestion(
             markerId: section.code,

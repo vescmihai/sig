@@ -2,9 +2,16 @@
     package="com.example.sig">
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
 
    <application
-        android:label="sig"
+        android:label="UAGRM MAPS"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <!-- Inserta tu clave de API aquí "AIzaSyBwq_P0ULoqAiJ43rDu5FN111dqLcjrG8o"-->
