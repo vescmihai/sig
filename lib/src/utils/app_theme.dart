@@ -7,7 +7,7 @@ class AppThemeData {
   static final ThemeData lightTheme = ThemeData(
     scaffoldBackgroundColor: Colors.white,
     primaryColor: const Color(0xFF007EE7),
-    primaryColorDark: Color(0xFFEFF5FC),
+    primaryColorDark: const Color(0xFFEFF5FC),
     hoverColor: Colors.white60,
     dividerColor: Colors.grey[200],
     fontFamily: GoogleFonts.openSans().fontFamily,

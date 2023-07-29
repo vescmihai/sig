@@ -1,10 +1,14 @@
 import 'dart:ffi';
-
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'dart:convert';
+//import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_webservice/places.dart' as maps_web_service;
 import 'package:location/location.dart';
 import 'package:sig/src/model/section_model.dart';
+import 'package:sig/src/utils/operations.dart';
 import 'package:sig/src/widget/inf_panel_widget.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import './../controller/maps_controller.dart';
@@ -14,6 +18,7 @@ import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:diacritic/diacritic.dart';
+import 'package:uuid/uuid.dart';
 
 class MapsScreen extends StatefulWidget {
   const MapsScreen({super.key});
@@ -28,6 +33,7 @@ class MapsScreenState extends State<MapsScreen> {
   Map<MarkerId, Marker> activeMarkers = {};
   Map<MarkerId, Marker> activeMarker = {};
   Section? selectedSection;
+  final _searchOrigenController = TextEditingController();
   GoogleMapController? mapController;
   LocationData? currentLocation;
   final PanelController _panelControlller = PanelController();
@@ -44,6 +50,10 @@ class MapsScreenState extends State<MapsScreen> {
   Duration _walkingDuration = Duration();
   double _walkingDistance = 0;
   late SpeechToText _speechToText;
+  bool _selectOrigen = false;
+  String googleKey = "AIzaSyAWqeXTDh8ANrGorI7lfnfH6Zkt0JgSKe0";
+  var uuid = const Uuid();
+  String _sessionToken = '1234567890';
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -229,71 +239,263 @@ class MapsScreenState extends State<MapsScreen> {
         controller: _panelControlller,
         minHeight: MediaQuery.of(context).size.height * 0.115,
         maxHeight: MediaQuery.of(context).size.height,
-        snapPoint: 0.5,
+        snapPoint: 0.55,
         backdropEnabled: true,
         backdropOpacity: 0.1,
         panelSnapping: true,
         panel: InformationPanelW(selectedSection: selectedSection),
         body: Padding(
           padding: const EdgeInsets.only(bottom: 80),
-          child: Stack(
+          child: Column(
             children: [
-              Column(children: [
-                searchBar(),
-                buildRouteModeButtons(),
-                buildRouteInfo(),
-                showMap()
-              ]),
-              Positioned(
-                  bottom: 110, right: 10, child: currentLocationButton()),
+
+              searchOrigenBar(),
+              searchBar(),
+              buildRouteModeButtons(),
+              buildRouteInfo(),
+              Expanded(
+                child: Stack(children: [
+                  showMap(),
+                  zoomButtons(),
+                  Positioned(
+                      bottom: 180, right: 10, child: currentLocationButton()),
+                  Positioned(
+                      bottom: 110,
+                      right: 10,
+                      child: calculateNewDistanceButton()),
+                ]),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+  
+  AnimatedSize searchOrigenBar() {
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 200),
+      child: SizedBox(
+          height: _selectOrigen ? 60 : 0,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Visibility(
+                visible: _selectOrigen,
+                child: TypeAheadField(
+                    textFieldConfiguration: TextFieldConfiguration(
+                      controller: _searchOrigenController,
+                      autofocus: false,
+                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                      onChanged: (value) {
+                        if (_sessionToken == null) {
+                          setState(() {
+                            _sessionToken = uuid.v4();
+                          });
+                        }
+                      },
+                      onTap: () async {},
+                      decoration: InputDecoration(
+                        labelText: 'Buscar ubicacion origen',
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.cancel),
+                          onPressed: () {
+                            _searchOrigenController.clear();
+                          },
+                        ),
+                      ),
+                    ),
+                    suggestionsCallback: getPlacesSuggestions,
+                    itemBuilder: (context, suggestion) {
+                      return ListTile(
+                        title: Text(suggestion.description ??
+                            'No hay lugares que mostrar'),
+                        subtitle: Text(
+                            suggestion.structuredFormatting?.mainText ?? ''),
+                      );
+                    },
+                    onSuggestionSelected: (suggestion) {
+                      String? placeId = suggestion.placeId;
+                      if (placeId != null) {
+                        _selectMarkerByPlace(placeId);
+                      }
+                      _searchOrigenController.text = suggestion.description!;
+                    })),
+          )),
+    );
+  }
 
-  Padding searchBar() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: TypeAheadField(
-        textFieldConfiguration: TextFieldConfiguration(
-          controller: _mapsController.searchController,
-          decoration: InputDecoration(
-            labelText: 'Buscar módulo',
-            suffixIcon: IconButton(
-              onPressed: _searchByVoice,
-              icon: const Icon(Icons.mic, color: Colors.red),
+  Future<List<maps_web_service.Prediction>> getPlacesSuggestions(
+      String query) async {
+    List<maps_web_service.Prediction> suggestions = [];
+    String type = '(regions)';
+    String radius = '50000';
+    String location = "-17.781774%2C-63.181267";
+
+    try {
+      String baseURL =
+          'https://maps.googleapis.com/maps/api/place/autocomplete/json';
+      String request =
+          '$baseURL?input=$query&location=$location&radius=$radius&strictbounds=true&key=$googleKey&sessiontoken=$_sessionToken';
+      var response = await http.get(Uri.parse(request));
+
+      if (response.statusCode == 200) {
+        var predictions = json.decode(response.body)['predictions'];
+
+        for (var prediction in predictions) {
+          suggestions.add(maps_web_service.Prediction(
+              description: prediction['description'],
+              placeId: prediction['place_id']));
+        }
+      } else {
+        throw Exception('Failed to load predictions');
+      }
+    } catch (e) {
+      // toastMessage('success');
+    }
+
+    return suggestions;
+  }
+
+  void _selectMarkerByPlace(String placeId) async {
+    String url =
+        "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$googleKey";
+
+    try {
+      var response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        var location = data['result']['geometry']['location'];
+        var location_name =
+            data['result']['address_components'][0]['long_name'];
+        var location_name2 =
+            data['result']['address_components'][1]['long_name'];
+
+        double lat = location['lat'];
+        double lng = location['lng'];
+        Marker selectedMarker = Marker(
+            markerId: MarkerId(placeId.substring(1, 6)),
+            position: LatLng(lat, lng),
+            onTap: () => _panelControlller.show(),
+            infoWindow:
+                InfoWindow(title: location_name, snippet: location_name2));
+
+        setState(() {
+          activeMarkers[const MarkerId('1')] = selectedMarker;
+        });
+        updateCamera();
+      } else {
+        print('Failed to load coordinates from place_id');
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  SizedBox searchBar() {
+    return SizedBox(
+      height: 65,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: TypeAheadField(
+          textFieldConfiguration: TextFieldConfiguration(
+            controller: _mapsController.searchController,
+            decoration: InputDecoration(
+              labelText: 'Buscar módulo',
+              suffixIcon: IconButton(
+                onPressed: _searchByVoice,
+                icon: const Icon(Icons.mic, color: Colors.red),
+              ),
             ),
+            onSubmitted: (value) {
+              _selectMarker;
+            },
           ),
-          onSubmitted: (value) {
-            _selectMarker;
+          suggestionsCallback: getSuggestions,
+          itemBuilder: (context, suggestion) {
+            return ListTile(
+              title: Text(suggestion.title),
+              subtitle: Text(suggestion.snippet),
+            );
+          },
+          onSuggestionSelected: (suggestion) {
+            _selectMarker(suggestion.markerId);
+            _mapsController.searchController.text = suggestion.title;
           },
         ),
-        suggestionsCallback: (pattern) async {
-          String query = pattern.toLowerCase();
-          return await getSuggestions(query);
-        },
-        itemBuilder: (context, suggestion) {
-          return ListTile(
-            title: Text(suggestion.title),
-            subtitle: Text(suggestion.snippet),
-          );
-        },
-        onSuggestionSelected: (suggestion) {
-          _selectMarker(suggestion.markerId);
-        },
       ),
     );
   }
 
-  Expanded showMap() {
-    return Expanded(
-        child: GoogleMap(
+  GoogleMap showMap() {
+    return GoogleMap(
       onMapCreated: _onMapCreated,
       initialCameraPosition: const CameraPosition(
         target: LatLng(-17.775615, -63.198539),
         zoom: 14,
+      ),
+      zoomControlsEnabled: false,
+      compassEnabled: true,
+      myLocationButtonEnabled: false,
+      myLocationEnabled: false,
+      markers: Set<Marker>.of(activeMarkers.values),
+      polylines: Set<Polyline>.of(_polylines.values),
+      onTap: (_) {
+        setState(() {
+          _selectOrigen = false;
+          _clearSelectedMarker();
+          _panelControlller.hide();
+        });
+      },
+    );
+  }
+
+  Positioned zoomButtons() {
+    return Positioned(
+      top: 40.0,
+      right: 13.0,
+      child: Column(
+        children: [
+          SizedBox(
+            width: 40,
+            height: 40,
+            child: ElevatedButton(
+              onPressed: () {
+                mapController?.animateCamera(CameraUpdate.zoomIn());
+              },
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.grey[700],
+                backgroundColor: Colors.white,
+                elevation: 6,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6.0),
+                ),
+                padding: EdgeInsets.zero,
+              ),
+              child: const Icon(Icons.add),
+            ),
+          ),
+          const SizedBox(height: 5),
+          SizedBox(
+            width: 40,
+            height: 40,
+            child: ElevatedButton(
+              onPressed: () {
+                mapController?.animateCamera(CameraUpdate.zoomOut());
+              },
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.grey[700],
+                backgroundColor: Colors.white,
+                elevation: 6,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6.0),
+                ),
+                padding: EdgeInsets.zero,
+              ),
+              child: const Icon(Icons.remove),
+            ),
+          ),
+        ],
       ),
       compassEnabled: true,
       myLocationButtonEnabled: true,
@@ -410,24 +612,49 @@ class MapsScreenState extends State<MapsScreen> {
         onTap: () => _panelControlller.show(),
         infoWindow: InfoWindow(
             title: section.descripcion,
-            snippet: 'Edificio: ${section.codEdificio}'));
+            snippet: 'Módulo: ${section.codEdificio}'));
 
+    setState(() {
+      activeMarkers[const MarkerId('2')] = selectedMarker;
+      _panelControlller.show();
+    });
+
+    updateCamera();
+
+    if (currentLocation != null) {
+      _getPolylinesWithLocation(currentLocation!.latitude!,
+          currentLocation!.longitude!, section.latitud, section.longitud);
+    }
+  }
+
+  void updateCamera() {
     if (mapController != null) {
-      mapController!.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          selectedMarker.position,
-          18,
-        ),
-      );
-      activeMarkers.clear();
-      setState(() {
-        activeMarkers[MarkerId(code.toString())] = selectedMarker;
-        _panelControlller.show();
-      });
+      var marker1 = activeMarkers[const MarkerId('1')];
+      var marker2 = activeMarkers[const MarkerId('2')];
 
-      if (currentLocation != null) {
-        _getPolylinesWithLocation(currentLocation!.latitude!,
-            currentLocation!.longitude!, section.latitud, section.longitud);
+      if (marker1 != null && marker2 == null) {
+        mapController!.animateCamera(
+          CameraUpdate.newLatLngZoom(
+            marker1.position,
+            15,
+          ),
+        );
+      } else if (marker1 == null && marker2 != null) {
+        mapController!.animateCamera(
+          CameraUpdate.newLatLngZoom(
+            marker2.position,
+            18,
+          ),
+        );
+      } else if (marker1 != null && marker2 != null) {
+        LatLngBounds? bounds =
+            operations.computeBounds([marker1.position, marker2.position]);
+        mapController!.animateCamera(
+          CameraUpdate.newLatLngBounds(
+            bounds,
+            110,
+          ),
+        );
       }
     }
   }
@@ -436,6 +663,8 @@ class MapsScreenState extends State<MapsScreen> {
     setState(() {
       activeMarkers.clear();
       _polylines.clear();
+      _searchOrigenController.clear();
+      _mapsController.searchController.clear();
     });
   }
 
@@ -498,9 +727,24 @@ class MapsScreenState extends State<MapsScreen> {
 
   Widget currentLocationButton() {
     return FloatingActionButton(
+      heroTag: "fab1",
       onPressed: _getCurrentLocation,
       child: const Icon(Icons.my_location,
-          color: Colors.red), // Cambio de color a rojo
+          color: Colors.white), // Cambio de color a rojo
+    );
+  }
+
+  Widget calculateNewDistanceButton() {
+    return FloatingActionButton(
+      heroTag: "fab2",
+      onPressed: () {
+        setState(() {
+          _selectOrigen = true;
+        });
+      },
+      child: const Icon(
+        Icons.route,
+      ),
     );
   }
 
