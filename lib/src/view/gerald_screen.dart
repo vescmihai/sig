@@ -248,7 +248,6 @@ class MapsScreenState extends State<MapsScreen> {
           padding: const EdgeInsets.only(bottom: 80),
           child: Column(
             children: [
-
               searchOrigenBar(),
               searchBar(),
               buildRouteModeButtons(),
@@ -269,58 +268,6 @@ class MapsScreenState extends State<MapsScreen> {
           ),
         ),
       ),
-    );
-  }
-  
-  AnimatedSize searchOrigenBar() {
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 200),
-      child: SizedBox(
-          height: _selectOrigen ? 60 : 0,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Visibility(
-                visible: _selectOrigen,
-                child: TypeAheadField(
-                    textFieldConfiguration: TextFieldConfiguration(
-                      controller: _searchOrigenController,
-                      autofocus: false,
-                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
-                      onChanged: (value) {
-                        if (_sessionToken == null) {
-                          setState(() {
-                            _sessionToken = uuid.v4();
-                          });
-                        }
-                      },
-                      onTap: () async {},
-                      decoration: InputDecoration(
-                        labelText: 'Buscar ubicacion origen',
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.cancel),
-                          onPressed: () {
-                            _searchOrigenController.clear();
-                          },
-                        ),
-                      ),
-                    ),
-                    suggestionsCallback: getPlacesSuggestions,
-                    itemBuilder: (context, suggestion) {
-                      return ListTile(
-                        title: Text(suggestion.description ??
-                            'No hay lugares que mostrar'),
-                        subtitle: Text(
-                            suggestion.structuredFormatting?.mainText ?? ''),
-                      );
-                    },
-                    onSuggestionSelected: (suggestion) {
-                      String? placeId = suggestion.placeId;
-                      if (placeId != null) {
-                        _selectMarkerByPlace(placeId);
-                      }
-                      _searchOrigenController.text = suggestion.description!;
-                    })),
-          )),
     );
   }
 
@@ -377,6 +324,8 @@ class MapsScreenState extends State<MapsScreen> {
             markerId: MarkerId(placeId.substring(1, 6)),
             position: LatLng(lat, lng),
             onTap: () => _panelControlller.show(),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueBlue), // Icono en rojo
             infoWindow:
                 InfoWindow(title: location_name, snippet: location_name2));
 
@@ -390,6 +339,58 @@ class MapsScreenState extends State<MapsScreen> {
     } catch (e) {
       print(e);
     }
+  }
+
+  AnimatedSize searchOrigenBar() {
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 200),
+      child: SizedBox(
+          height: _selectOrigen ? 70 : 0,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+            child: Visibility(
+                visible: _selectOrigen,
+                child: TypeAheadField(
+                    textFieldConfiguration: TextFieldConfiguration(
+                      controller: _searchOrigenController,
+                      autofocus: false,
+                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                      onChanged: (value) {
+                        if (_sessionToken == null) {
+                          setState(() {
+                            _sessionToken = uuid.v4();
+                          });
+                        }
+                      },
+                      onTap: () async {},
+                      decoration: InputDecoration(
+                        labelText: 'Buscar ubicacion origen',
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.cancel),
+                          onPressed: () {
+                            _searchOrigenController.clear();
+                          },
+                        ),
+                      ),
+                    ),
+                    suggestionsCallback: getPlacesSuggestions,
+                    itemBuilder: (context, suggestion) {
+                      return ListTile(
+                        title: Text(suggestion.description ??
+                            'No hay lugares que mostrar'),
+                        subtitle: Text(
+                            suggestion.structuredFormatting?.mainText ?? ''),
+                      );
+                    },
+                    onSuggestionSelected: (suggestion) {
+                      String? placeId = suggestion.placeId;
+                      if (placeId != null) {
+                        _selectMarkerByPlace(placeId);
+                      }
+                      _searchOrigenController.text = suggestion.description!;
+                    })),
+          )),
+    );
   }
 
   SizedBox searchBar() {
@@ -443,7 +444,7 @@ class MapsScreenState extends State<MapsScreen> {
       onTap: (_) {
         setState(() {
           _selectOrigen = false;
-          _clearSelectedMarker();
+          _clearAllMarkers();
           _panelControlller.hide();
         });
       },
@@ -497,25 +498,7 @@ class MapsScreenState extends State<MapsScreen> {
           ),
         ],
       ),
-      compassEnabled: true,
-      myLocationButtonEnabled: true,
-      myLocationEnabled: true,
-      markers: Set<Marker>.of(activeMarkers.values)
-          .union(Set<Marker>.of(activeMarker.values)),
-      polylines: Set<Polyline>.of(_polylines.values),
-      onTap: (LatLng position) {
-        setState(() {
-          _panelControlller.hide();
-
-          _onMapTap(position);
-        });
-      },
-      onLongPress: (LatLng position) {
-        setState(() {
-          _clearAllMarkers();
-        });
-      },
-    ));
+    );
   }
 
   void _clearAllMarkers() {
@@ -528,6 +511,9 @@ class MapsScreenState extends State<MapsScreen> {
       _drivingDuration = Duration();
       _walkingDistance = 0;
       _walkingDuration = Duration();
+
+      _searchOrigenController.clear();
+      _mapsController.searchController.clear();
     });
   }
 
@@ -652,20 +638,11 @@ class MapsScreenState extends State<MapsScreen> {
         mapController!.animateCamera(
           CameraUpdate.newLatLngBounds(
             bounds,
-            110,
+            90,
           ),
         );
       }
     }
-  }
-
-  void _clearSelectedMarker() {
-    setState(() {
-      activeMarkers.clear();
-      _polylines.clear();
-      _searchOrigenController.clear();
-      _mapsController.searchController.clear();
-    });
   }
 
   _getPolylinesWithLocation(double originLat, double originLong,
@@ -768,23 +745,23 @@ class MapsScreenState extends State<MapsScreen> {
         return;
       }
     }
-    activeMarker.clear();
+    //activeMarker.clear();
     currentLocation = await location.getLocation();
     LatLng latLng =
         LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
 
     Marker currentLocationMarker = Marker(
-      markerId: MarkerId("current_location"), // Nuevo MarkerId
+      markerId: const MarkerId("1"), // Nuevo MarkerId
       position: latLng,
       icon: BitmapDescriptor.defaultMarkerWithHue(
           BitmapDescriptor.hueBlue), // Icono en rojo
     );
 
     setState(() {
-      activeMarker[MarkerId("current_location")] = currentLocationMarker;
+      activeMarkers[const MarkerId("1")] = currentLocationMarker;
     });
 
-    mapController!.animateCamera(CameraUpdate.newLatLngZoom(latLng, 15));
+    updateCamera();
   }
 
   Future<List<MarkerSuggestion>> getSuggestions(String query) async {
