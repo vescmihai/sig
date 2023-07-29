@@ -52,7 +52,8 @@ dependencies:
   panorama: ^0.4.1
   google_map_polyline_new: ^0.3.0+2
   intl: ^0.18.1
-  speech_to_text: ^5.0.0
+  speech_to_text: ^6.3.0
+  diacritic: ^0.1.4
 
 dev_dependencies:
   flutter_test:

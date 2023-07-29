@@ -105,18 +105,17 @@ class BackgroundImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(25),
+      borderRadius: BorderRadius.circular(2),
       child: Container(
-        width: 200,
-        height: 200,
+        width: 600,
+        height: 300,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/siguagrm.png'),
+            image: AssetImage('assets/uagrmred.png'),
             fit: BoxFit.cover,
           ),
         ),
       ),
     );
   }
-  
 }

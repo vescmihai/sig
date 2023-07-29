@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,6 +13,7 @@ import 'package:google_map_polyline_new/google_map_polyline_new.dart';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:diacritic/diacritic.dart';
 
 class MapsScreen extends StatefulWidget {
   const MapsScreen({super.key});
@@ -18,20 +21,20 @@ class MapsScreen extends StatefulWidget {
   MapsScreenState createState() => MapsScreenState();
 }
 
-
 class MapsScreenState extends State<MapsScreen> {
-  
   final MapsController _mapsController = MapsController();
   Future<List<Section>> futureSections = SeccionList.getSections();
   Map<MarkerId, BitmapDescriptor> markerIcons = {};
   Map<MarkerId, Marker> activeMarkers = {};
+  Map<MarkerId, Marker> activeMarker = {};
   Section? selectedSection;
   GoogleMapController? mapController;
   LocationData? currentLocation;
   final PanelController _panelControlller = PanelController();
   List<LatLng> routePoints = [];
   PolylineId selectedRoute = PolylineId('selected_route');
-  GoogleMapPolyline googleMapPolyline = GoogleMapPolyline(apiKey: "AIzaSyAQtoTgG5oyEQt-MswvRgoavtk822Wghck");
+  GoogleMapPolyline googleMapPolyline =
+      GoogleMapPolyline(apiKey: "AIzaSyAQtoTgG5oyEQt-MswvRgoavtk822Wghck");
   Map<PolylineId, Polyline> _polylines = <PolylineId, Polyline>{};
   int _polylineCount = 1;
   bool _loading = false;
@@ -80,8 +83,21 @@ class MapsScreenState extends State<MapsScreen> {
             setState(() {
               _routeMode = RouteMode.driving;
               if (selectedSection != null && currentLocation != null) {
-                _getPolylinesWithLocation(currentLocation!.latitude!, currentLocation!.longitude!,
-                    selectedSection!.latitud, selectedSection!.longitud);
+                _getPolylinesWithLocation(
+                    currentLocation!.latitude!,
+                    currentLocation!.longitude!,
+                    selectedSection!.latitud,
+                    selectedSection!.longitud);
+              } else if (selectedSection != null &&
+                  activeMarker.containsKey(MarkerId('user_marker'))) {
+                LatLng userMarkerPosition =
+                    activeMarker[MarkerId('user_marker')]!.position;
+                _getPolylinesWithLocation(
+                  userMarkerPosition.latitude,
+                  userMarkerPosition.longitude,
+                  selectedSection!.latitud,
+                  selectedSection!.longitud,
+                );
               }
             });
           },
@@ -93,8 +109,21 @@ class MapsScreenState extends State<MapsScreen> {
             setState(() {
               _routeMode = RouteMode.walking;
               if (selectedSection != null && currentLocation != null) {
-                _getPolylinesWithLocation(currentLocation!.latitude!, currentLocation!.longitude!,
-                    selectedSection!.latitud, selectedSection!.longitud);
+                _getPolylinesWithLocation(
+                    currentLocation!.latitude!,
+                    currentLocation!.longitude!,
+                    selectedSection!.latitud,
+                    selectedSection!.longitud);
+              } else if (selectedSection != null &&
+                  activeMarker.containsKey(MarkerId('user_marker'))) {
+                LatLng userMarkerPosition =
+                    activeMarker[MarkerId('user_marker')]!.position;
+                _getPolylinesWithLocation(
+                  userMarkerPosition.latitude,
+                  userMarkerPosition.longitude,
+                  selectedSection!.latitud,
+                  selectedSection!.longitud,
+                );
               }
             });
           },
@@ -103,6 +132,41 @@ class MapsScreenState extends State<MapsScreen> {
     );
   }
 
+//falta actualizar la informacion en tiempo y distancia con el userMarker-------------------------
+  void _onMapTap(LatLng position) {
+    setState(() {
+      Marker userMarker = Marker(
+        markerId: MarkerId('user_marker'),
+        position: position,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+      );
+      activeMarker[MarkerId('user_marker')] = userMarker;
+
+      // Update the markers on the map by creating a new set with the updated markers.
+      Set<Marker> updatedMarkers = Set.of(activeMarkers.values)
+        ..addAll(activeMarker.values);
+      activeMarkers =
+          Map.fromIterable(updatedMarkers, key: (marker) => marker.markerId);
+
+      // Now call the route calculation function after the user marker is added to the map.
+      if (selectedSection != null &&
+          activeMarker.containsKey(MarkerId('user_marker'))) {
+        LatLng userMarkerPosition =
+            activeMarker[MarkerId('user_marker')]!.position;
+        _getPolylinesWithLocation(
+          userMarkerPosition.latitude,
+          userMarkerPosition.longitude,
+          selectedSection!.latitud,
+          selectedSection!.longitud,
+        );
+
+        // Update route info based on the selected mode
+        _updateRouteInfo(_routeMode);
+      }
+    });
+  }
+
+//------------------------------------------------------------------------------------------------
   Future<void> _searchByVoice() async {
     bool available = await _speechToText.initialize(
       onError: (val) => print('onError: $val'),
@@ -111,18 +175,28 @@ class MapsScreenState extends State<MapsScreen> {
     print('Disponibilidad de SpeechToText: $available'); // depuración
     if (available) {
       _speechToText.listen(
-        onResult: (val) => setState(() {
-          _mapsController.searchController.text = val.recognizedWords;
-        }),
+        onResult: (val) async {
+          String recognizedWords = val.recognizedWords.toLowerCase();
+          List<MarkerSuggestion> suggestions =
+              await getSuggestions(recognizedWords);
+          _mapsController.searchController.text = recognizedWords;
+          // No necesitas una variable "filteredSuggestions",
+          // simplemente usa la lista "suggestions" directamente.
+          setState(() {
+            // La lista "suggestions" se mostrará en el TypeAheadField.
+          });
+        },
         listenFor: Duration(seconds: 10), // tiempo límite para escuchar
         pauseFor: Duration(seconds: 5), // tiempo límite para pausar
         partialResults: true, // Puedes activar resultados parciales.
-        onSoundLevelChange: (level) => print('Nivel de sonido: $level'), // depuración
+        onSoundLevelChange: (level) =>
+            print('Nivel de sonido: $level'), // depuración
         cancelOnError: true, // cancelar la escucha en caso de error.
         listenMode: ListenMode.confirmation, // modo de escucha.
       );
     } else {
-      print('El reconocimiento de voz no está disponible en este dispositivo.'); // depuración
+      print(
+          'El reconocimiento de voz no está disponible en este dispositivo.'); // depuración
     }
   }
 
@@ -164,8 +238,12 @@ class MapsScreenState extends State<MapsScreen> {
           padding: const EdgeInsets.only(bottom: 80),
           child: Stack(
             children: [
-              
-              Column(children: [searchBar(), buildRouteModeButtons(), buildRouteInfo(), showMap()]),
+              Column(children: [
+                searchBar(),
+                buildRouteModeButtons(),
+                buildRouteInfo(),
+                showMap()
+              ]),
               Positioned(
                   bottom: 110, right: 10, child: currentLocationButton()),
             ],
@@ -175,72 +253,94 @@ class MapsScreenState extends State<MapsScreen> {
     );
   }
 
-
   Padding searchBar() {
-  return Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: TypeAheadField(
-      textFieldConfiguration: TextFieldConfiguration(
-        controller: _mapsController.searchController,
-        decoration: InputDecoration(
-          labelText: 'Buscar módulo',
-          suffixIcon: IconButton(
-            onPressed: _searchByVoice,
-            icon: const Icon(Icons.mic, color: Colors.red),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: TypeAheadField(
+        textFieldConfiguration: TextFieldConfiguration(
+          controller: _mapsController.searchController,
+          decoration: InputDecoration(
+            labelText: 'Buscar módulo',
+            suffixIcon: IconButton(
+              onPressed: _searchByVoice,
+              icon: const Icon(Icons.mic, color: Colors.red),
+            ),
           ),
+          onSubmitted: (value) {
+            _selectMarker;
+          },
         ),
-        onSubmitted: (value) {
-          _selectMarker;
+        suggestionsCallback: (pattern) async {
+          String query = pattern.toLowerCase();
+          return await getSuggestions(query);
         },
-      ),
-      suggestionsCallback: getSuggestions,
-      itemBuilder: (context, suggestion) {
-        return ListTile(
-          title: Text(suggestion.title),
-          subtitle: Text(suggestion.snippet),
-        );
-      },
-      onSuggestionSelected: (suggestion) {
-        _selectMarker(suggestion.markerId);
-      },
-    ),
-  );
-}
-
-  
-  Expanded showMap() {
-    return Expanded(
-      child: GoogleMap(
-        onMapCreated: _onMapCreated,
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(-17.775615, -63.198539),
-          zoom: 14,
-        ),
-        compassEnabled: true,
-        myLocationButtonEnabled: true,
-        myLocationEnabled: true,
-        markers: Set<Marker>.of(activeMarkers.values),
-        polylines: Set<Polyline>.of(_polylines.values), 
-        onTap: (_) {
-          setState(() {
-            _panelControlller.hide();
-            _clearSelectedMarker();
-          });
+        itemBuilder: (context, suggestion) {
+          return ListTile(
+            title: Text(suggestion.title),
+            subtitle: Text(suggestion.snippet),
+          );
+        },
+        onSuggestionSelected: (suggestion) {
+          _selectMarker(suggestion.markerId);
         },
       ),
     );
   }
 
+  Expanded showMap() {
+    return Expanded(
+        child: GoogleMap(
+      onMapCreated: _onMapCreated,
+      initialCameraPosition: const CameraPosition(
+        target: LatLng(-17.775615, -63.198539),
+        zoom: 14,
+      ),
+      compassEnabled: true,
+      myLocationButtonEnabled: true,
+      myLocationEnabled: true,
+      markers: Set<Marker>.of(activeMarkers.values)
+          .union(Set<Marker>.of(activeMarker.values)),
+      polylines: Set<Polyline>.of(_polylines.values),
+      onTap: (LatLng position) {
+        setState(() {
+          _panelControlller.hide();
+
+          _onMapTap(position);
+        });
+      },
+      onLongPress: (LatLng position) {
+        setState(() {
+          _clearAllMarkers();
+        });
+      },
+    ));
+  }
+
+  void _clearAllMarkers() {
+    setState(() {
+      activeMarker.clear();
+      activeMarkers.clear();
+      currentLocation = null;
+      _polylines.clear();
+      _drivingDistance = 0;
+      _drivingDuration = Duration();
+      _walkingDistance = 0;
+      _walkingDuration = Duration();
+    });
+  }
+
   void _updateRouteInfo(RouteMode mode) async {
     if (selectedSection != null && currentLocation != null) {
       String modeStr = mode == RouteMode.driving ? 'driving' : 'walking';
-      String origin = '${currentLocation!.latitude!},${currentLocation!.longitude!}';
-      String destination = '${selectedSection!.latitud},${selectedSection!.longitud}';
+      String origin =
+          '${currentLocation!.latitude!},${currentLocation!.longitude!}';
+      String destination =
+          '${selectedSection!.latitud},${selectedSection!.longitud}';
 
-      String url = 'https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&mode=$modeStr&key=AIzaSyAQtoTgG5oyEQt-MswvRgoavtk822Wghck';
-      
+      String url =
+          'https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&mode=$modeStr&key=AIzaSyAQtoTgG5oyEQt-MswvRgoavtk822Wghck';
+
       http.Response response = await http.get(Uri.parse(url));
-
 
       if (response.statusCode == 200) {
         var jsonResponse = convert.jsonDecode(response.body);
@@ -298,9 +398,6 @@ class MapsScreenState extends State<MapsScreen> {
     return Duration(hours: hours, minutes: minutes);
   }
 
-
-
-
   void _selectMarker(int code) async {
     var sections = await futureSections;
 
@@ -310,7 +407,7 @@ class MapsScreenState extends State<MapsScreen> {
     Marker selectedMarker = Marker(
         markerId: MarkerId(section.code.toString()),
         position: LatLng(section.latitud, section.longitud),
-        onTap:() => _panelControlller.show(),
+        onTap: () => _panelControlller.show(),
         infoWindow: InfoWindow(
             title: section.descripcion,
             snippet: 'Edificio: ${section.codEdificio}'));
@@ -329,8 +426,8 @@ class MapsScreenState extends State<MapsScreen> {
       });
 
       if (currentLocation != null) {
-        _getPolylinesWithLocation(currentLocation!.latitude!, currentLocation!.longitude!,
-            section.latitud, section.longitud);
+        _getPolylinesWithLocation(currentLocation!.latitude!,
+            currentLocation!.longitude!, section.latitud, section.longitud);
       }
     }
   }
@@ -345,10 +442,11 @@ class MapsScreenState extends State<MapsScreen> {
   _getPolylinesWithLocation(double originLat, double originLong,
       double destinationLat, double destinationLong) async {
     _setLoadingMenu(true);
-    List<LatLng>? _coordinates = await googleMapPolyline.getCoordinatesWithLocation(
-        origin: LatLng(originLat, originLong),
-        destination: LatLng(destinationLat, destinationLong),
-        mode: _routeMode);
+    List<LatLng>? _coordinates =
+        await googleMapPolyline.getCoordinatesWithLocation(
+            origin: LatLng(originLat, originLong),
+            destination: LatLng(destinationLat, destinationLong),
+            mode: _routeMode);
 
     setState(() {
       _polylines.clear();
@@ -359,27 +457,25 @@ class MapsScreenState extends State<MapsScreen> {
   }
 
   String formatDuration(Duration d) {
-      String result = "";
+    String result = "";
 
-      if(d.inDays > 0){
-          result += d.inDays.toString() + "d ";
-      }
-      if(d.inHours.remainder(24) > 0){
-          result += d.inHours.remainder(24).toString() + "h ";
-      }
-      if(d.inMinutes.remainder(60) > 0){
-          result += d.inMinutes.remainder(60).toString() + " min";
-      }
-      if(d.inSeconds.remainder(60) > 0){
-          result += d.inSeconds.remainder(60).toString() + " seg";
-      }
+    if (d.inDays > 0) {
+      result += d.inDays.toString() + "d ";
+    }
+    if (d.inHours.remainder(24) > 0) {
+      result += d.inHours.remainder(24).toString() + "h ";
+    }
+    if (d.inMinutes.remainder(60) > 0) {
+      result += d.inMinutes.remainder(60).toString() + " min";
+    }
+    if (d.inSeconds.remainder(60) > 0) {
+      result += d.inSeconds.remainder(60).toString() + " seg";
+    }
 
-      return result;
+    return result;
   }
 
-
-
-   _addPolyline(List<LatLng>? _coordinates) {
+  _addPolyline(List<LatLng>? _coordinates) {
     PolylineId id = PolylineId("poly$_polylineCount");
     Polyline polyline = Polyline(
         polylineId: id,
@@ -407,53 +503,62 @@ class MapsScreenState extends State<MapsScreen> {
           color: Colors.red), // Cambio de color a rojo
     );
   }
-  
 
   void _getCurrentLocation() async {
-  Location location = Location();
-  bool serviceEnabled;
-  PermissionStatus permissionGranted;
+    Location location = Location();
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
 
-  serviceEnabled = await location.serviceEnabled();
-  if (!serviceEnabled) {
-    serviceEnabled = await location.requestService();
+    serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
-      return;
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
     }
-  }
 
-  permissionGranted = await location.hasPermission();
-  if (permissionGranted == PermissionStatus.denied) {
-    permissionGranted = await location.requestPermission();
-    if (permissionGranted != PermissionStatus.granted) {
-      return;
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return;
+      }
     }
+    activeMarker.clear();
+    currentLocation = await location.getLocation();
+    LatLng latLng =
+        LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
+
+    Marker currentLocationMarker = Marker(
+      markerId: MarkerId("current_location"), // Nuevo MarkerId
+      position: latLng,
+      icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueBlue), // Icono en rojo
+    );
+
+    setState(() {
+      activeMarker[MarkerId("current_location")] = currentLocationMarker;
+    });
+
+    mapController!.animateCamera(CameraUpdate.newLatLngZoom(latLng, 15));
   }
-
-  currentLocation = await location.getLocation();
-  LatLng latLng =
-      LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
-  
-  Marker currentLocationMarker = Marker(
-    markerId: MarkerId("current_location"), // Nuevo MarkerId
-    position: latLng,
-    icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed), // Icono en rojo
-  );
-  
-  setState(() {
-    activeMarkers[MarkerId("current_location")] = currentLocationMarker;
-  });
-
-  mapController!.animateCamera(CameraUpdate.newLatLngZoom(latLng, 15));
-}
 
   Future<List<MarkerSuggestion>> getSuggestions(String query) async {
     List<MarkerSuggestion> suggestions = [];
     List<Section> sections = await futureSections;
+    String normalizedQuery =
+        removeDiacritics(query.toLowerCase()); // Remueve tildes
     for (Section section in sections) {
-      if (section.descripcion.toLowerCase().contains(query.toLowerCase()) ||
-          section.codEdificio.toString().contains(query.toLowerCase()) ||
-          section.edificio!.toLowerCase().contains(query.toLowerCase())) {
+      String normalizedDescription =
+          removeDiacritics(section.descripcion.toLowerCase());
+      String normalizedEdificio =
+          removeDiacritics(section.edificio!.toLowerCase());
+      String normalizedCodEdificio =
+          removeDiacritics(section.codEdificio.toString().toLowerCase());
+
+      if (normalizedDescription.contains(normalizedQuery) ||
+          normalizedCodEdificio.contains(normalizedQuery) ||
+          normalizedEdificio.contains(normalizedQuery)) {
         suggestions.add(
           MarkerSuggestion(
             markerId: section.code,
