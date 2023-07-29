@@ -13,7 +13,11 @@ class CarouselImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return listImageItems(edificioCode, sectionCode);
+    if (edificioCode.isNotEmpty && sectionCode.isNotEmpty) {
+      return listImageItems(edificioCode, sectionCode);
+    } else {
+      return caruselEmpty();
+    }
   }
 
   FutureBuilder listImageItems(String edificioCode, sectionCode) {
@@ -51,6 +55,22 @@ class CarouselImageWidget extends StatelessWidget {
                 child: const CircularProgressIndicator());
           }
         });
+  }
+
+  CarouselSlider caruselEmpty() {
+    return CarouselSlider(
+        items: [notFoundImageWidget()],
+        options: CarouselOptions(
+          height: 185,
+          aspectRatio: 16 / 9,
+          viewportFraction: 0.9,
+          enlargeCenterPage: false,
+          initialPage: 0,
+          enableInfiniteScroll: false,
+          reverse: false,
+          autoPlay: false,
+          scrollDirection: Axis.horizontal,
+        ));
   }
 
   CachedNetworkImage imageWidget(String imageUrl) {

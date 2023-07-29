@@ -45,6 +45,7 @@ class SeccionList {
 
     for (var item in sectionsJson) {
       String pisoString = '';
+      String tipo = '';
       switch (item['piso']) {
         case 0:
           pisoString = 'Planta baja';
@@ -53,7 +54,7 @@ class SeccionList {
           pisoString = '1er piso';
           break;
         case 2:
-          pisoString = ' 2do piso';
+          pisoString = '2do piso';
           break;
         case 3:
           pisoString = '3er piso';
@@ -65,6 +66,24 @@ class SeccionList {
           pisoString = '5to piso';
           break;
         default:
+      }
+
+      switch (item['tipo'].toString().toUpperCase()) {
+        case 'A':
+          tipo = 'Aula';
+          break;
+        case 'C':
+          tipo = 'Centro de cómputo';
+          break;
+        case 'L':
+          tipo = 'Laboratorio';
+          break;
+        case 'O':
+          tipo = 'Oficina';
+          break;
+        default:
+          tipo = item['tipo'].toString();
+          break;
       }
 
       var edificio = edificiosJson.firstWhere((record) =>
@@ -80,7 +99,7 @@ class SeccionList {
         piso: pisoString,
         recursos: item['recursos'].toString(),
         capacidadMax: item['capacidad_max'],
-        tipo: item['tipo'].toString(),
+        tipo: tipo,
       );
       locations.add(seccion);
     }
