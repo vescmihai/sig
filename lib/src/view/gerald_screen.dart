@@ -210,6 +210,37 @@ class MapsScreenState extends State<MapsScreen> {
     }
   }
 
+  Future<void> _searchByVoiceOrigin() async {
+    bool available = await _speechToText.initialize(
+      onError: (val) => print('onError: $val'),
+      onStatus: (val) => print('onStatus: $val'),
+    );
+    print('Disponibilidad de SpeechToText: $available'); // depuración
+    if (available) {
+      _speechToText.listen(
+        onResult: (val) async {
+          String recognizedWords = val.recognizedWords.toLowerCase();
+          _searchOrigenController.text = recognizedWords;
+          // No necesitas una variable "filteredSuggestions",
+          // simplemente usa la lista "suggestions" directamente.
+          setState(() {
+            // La lista "suggestions" se mostrará en el TypeAheadField.
+          });
+        },
+        listenFor: Duration(seconds: 10), // tiempo límite para escuchar
+        pauseFor: Duration(seconds: 5), // tiempo límite para pausar
+        partialResults: true, // Puedes activar resultados parciales.
+        onSoundLevelChange: (level) =>
+            print('Nivel de sonido: $level'), // depuración
+        cancelOnError: true, // cancelar la escucha en caso de error.
+        listenMode: ListenMode.confirmation, // modo de escucha.
+      );
+    } else {
+      print(
+          'El reconocimiento de voz no está disponible en este dispositivo.'); // depuración
+    }
+  }
+
   Widget buildRouteInfo() {
     String durationStr = '';
     String distanceStr = '';
@@ -365,11 +396,21 @@ class MapsScreenState extends State<MapsScreen> {
                       onTap: () async {},
                       decoration: InputDecoration(
                         labelText: 'Buscar ubicacion origen',
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.cancel),
-                          onPressed: () {
-                            _searchOrigenController.clear();
-                          },
+                        suffixIcon: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.cancel),
+                              onPressed: () {
+                                _searchOrigenController.clear();
+                              },
+                            ),
+                            IconButton(
+                              onPressed: _searchByVoiceOrigin,
+                              icon:
+                                  Icon(Icons.mic, color: Colors.red, size: 24),
+                            ),
+                          ],
                         ),
                       ),
                     ),
