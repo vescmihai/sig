@@ -99,9 +99,9 @@ class MapsScreenState extends State<MapsScreen> {
                     selectedSection!.latitud,
                     selectedSection!.longitud);
               } else if (selectedSection != null &&
-                  activeMarker.containsKey(MarkerId('user_marker'))) {
+                  activeMarkers.containsKey(MarkerId('1'))) {
                 LatLng userMarkerPosition =
-                    activeMarker[MarkerId('user_marker')]!.position;
+                    activeMarkers[MarkerId('1')]!.position;
                 _getPolylinesWithLocation(
                   userMarkerPosition.latitude,
                   userMarkerPosition.longitude,
@@ -125,9 +125,9 @@ class MapsScreenState extends State<MapsScreen> {
                     selectedSection!.latitud,
                     selectedSection!.longitud);
               } else if (selectedSection != null &&
-                  activeMarker.containsKey(MarkerId('user_marker'))) {
+                  activeMarkers.containsKey(MarkerId('1'))) {
                 LatLng userMarkerPosition =
-                    activeMarker[MarkerId('user_marker')]!.position;
+                    activeMarkers[MarkerId('1')]!.position;
                 _getPolylinesWithLocation(
                   userMarkerPosition.latitude,
                   userMarkerPosition.longitude,
@@ -150,16 +150,16 @@ class MapsScreenState extends State<MapsScreen> {
         position: position,
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
       );
-      activeMarker[MarkerId('user_marker')] = userMarker;
+      activeMarkers[MarkerId('1')] = userMarker;
 
       // Update the markers on the map by creating a new set with the updated markers.
-      Set<Marker> updatedMarkers = Set.of(activeMarkers.values)
-        ..addAll(activeMarker.values);
+      /*  Set<Marker> updatedMarkers = Set.of(activeMarkers.values)
+        ..addAll(activeMarkers.values);
       activeMarkers =
           Map.fromIterable(updatedMarkers, key: (marker) => marker.markerId);
-
+*/
       // Now call the route calculation function after the user marker is added to the map.
-      if (selectedSection != null &&
+      /*  if (selectedSection != null &&
           activeMarker.containsKey(MarkerId('user_marker'))) {
         LatLng userMarkerPosition =
             activeMarker[MarkerId('user_marker')]!.position;
@@ -172,7 +172,7 @@ class MapsScreenState extends State<MapsScreen> {
 
         // Update route info based on the selected mode
         _updateRouteInfo(_routeMode);
-      }
+      }*/
     });
   }
 
@@ -482,7 +482,15 @@ class MapsScreenState extends State<MapsScreen> {
       myLocationEnabled: false,
       markers: Set<Marker>.of(activeMarkers.values),
       polylines: Set<Polyline>.of(_polylines.values),
-      onTap: (_) {
+      onTap: (LatLng position) {
+        setState(() {
+          _selectOrigen = false;
+          _clearAllMarkers();
+          _panelControlller.hide();
+          _onMapTap(position);
+        });
+      },
+      onLongPress: (LatLng position) {
         setState(() {
           _selectOrigen = false;
           _clearAllMarkers();
