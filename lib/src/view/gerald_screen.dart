@@ -87,27 +87,23 @@ class MapsScreenState extends State<MapsScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         IconButton(
-          icon: Icon(Icons.directions_car),
+          icon: const Icon(Icons.directions_car),
           color: _routeMode == RouteMode.driving ? Colors.blue : Colors.grey,
           onPressed: () {
             setState(() {
               _routeMode = RouteMode.driving;
-              if (selectedSection != null && currentLocation != null) {
+              if (activeMarkers[const MarkerId('1')] != null &&
+                  activeMarkers[const MarkerId('2')] != null) {
+                LatLng origenPosition =
+                    activeMarkers[const MarkerId('1')]!.position;
+                LatLng finalPosition =
+                    activeMarkers[const MarkerId('2')]!.position;
+
                 _getPolylinesWithLocation(
-                    currentLocation!.latitude!,
-                    currentLocation!.longitude!,
-                    selectedSection!.latitud,
-                    selectedSection!.longitud);
-              } else if (selectedSection != null &&
-                  activeMarkers.containsKey(MarkerId('1'))) {
-                LatLng userMarkerPosition =
-                    activeMarkers[MarkerId('1')]!.position;
-                _getPolylinesWithLocation(
-                  userMarkerPosition.latitude,
-                  userMarkerPosition.longitude,
-                  selectedSection!.latitud,
-                  selectedSection!.longitud,
-                );
+                    origenPosition.latitude,
+                    origenPosition.longitude,
+                    finalPosition.latitude,
+                    finalPosition.longitude);
               }
             });
           },
@@ -118,22 +114,18 @@ class MapsScreenState extends State<MapsScreen> {
           onPressed: () {
             setState(() {
               _routeMode = RouteMode.walking;
-              if (selectedSection != null && currentLocation != null) {
+              if (activeMarkers[const MarkerId('1')] != null &&
+                  activeMarkers[const MarkerId('2')] != null) {
+                LatLng origenPosition =
+                    activeMarkers[const MarkerId('1')]!.position;
+                LatLng finalPosition =
+                    activeMarkers[const MarkerId('2')]!.position;
+
                 _getPolylinesWithLocation(
-                    currentLocation!.latitude!,
-                    currentLocation!.longitude!,
-                    selectedSection!.latitud,
-                    selectedSection!.longitud);
-              } else if (selectedSection != null &&
-                  activeMarkers.containsKey(MarkerId('1'))) {
-                LatLng userMarkerPosition =
-                    activeMarkers[MarkerId('1')]!.position;
-                _getPolylinesWithLocation(
-                  userMarkerPosition.latitude,
-                  userMarkerPosition.longitude,
-                  selectedSection!.latitud,
-                  selectedSection!.longitud,
-                );
+                    origenPosition.latitude,
+                    origenPosition.longitude,
+                    finalPosition.latitude,
+                    finalPosition.longitude);
               }
             });
           },
@@ -567,12 +559,14 @@ class MapsScreenState extends State<MapsScreen> {
   }
 
   void _updateRouteInfo(RouteMode mode) async {
-    if (selectedSection != null && currentLocation != null) {
+    
+    if (activeMarkers[const MarkerId('1')] != null &&
+        activeMarkers[const MarkerId('2')] != null) {
       String modeStr = mode == RouteMode.driving ? 'driving' : 'walking';
       String origin =
-          '${currentLocation!.latitude!},${currentLocation!.longitude!}';
+          '${activeMarkers[const MarkerId('1')]?.position.latitude},${activeMarkers[const MarkerId('1')]?.position.longitude}';
       String destination =
-          '${selectedSection!.latitud},${selectedSection!.longitud}';
+          '${activeMarkers[const MarkerId('2')]?.position.latitude},${activeMarkers[const MarkerId('2')]?.position.longitude}';
 
       String url =
           'https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&mode=$modeStr&key=AIzaSyAQtoTgG5oyEQt-MswvRgoavtk822Wghck';
@@ -816,6 +810,7 @@ class MapsScreenState extends State<MapsScreen> {
   Future<List<MarkerSuggestion>> getSuggestions(String query) async {
     List<MarkerSuggestion> suggestions = [];
     List<Section> sections = await futureSections;
+
     String normalizedQuery =
         removeDiacritics(query.toLowerCase()); // Remueve tildes
     for (Section section in sections) {

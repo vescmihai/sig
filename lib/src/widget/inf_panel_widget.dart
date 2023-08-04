@@ -38,20 +38,13 @@ class InformationPanelW extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                selectedSection?.codEdificio != null
-                    ? 'Módulo ${selectedSection?.codEdificio}, ${selectedSection?.piso}'
-                    : 'Módulo ?',
-              ),
+              if (selectedSection?.codEdificio != null)
+                Text(
+                    'Módulo ${selectedSection?.codEdificio}, ${selectedSection?.piso}'),
               Text(
                 selectedSection?.capacidadMax != null
                     ? 'Capacidad max: ${selectedSection?.capacidadMax} personas'
                     : 'Capacidad max: ?',
-              ),
-              Text(
-                selectedSection?.area != null
-                    ? 'Area: ${selectedSection?.recursos} mt2'
-                    : 'Area: ?',
               ),
               Text(
                 selectedSection?.recursos != null
@@ -62,6 +55,11 @@ class InformationPanelW extends StatelessWidget {
                 selectedSection?.tipo != null
                     ? 'Tipo: ${selectedSection?.tipo}'
                     : 'Tipo: ?',
+              ),
+              Text(
+                selectedSection?.ciudad != null
+                    ? 'Ciudad: ${selectedSection?.ciudad}'
+                    : 'Ciudad: ?',
               ),
             ],
           ),

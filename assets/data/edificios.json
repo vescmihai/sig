@@ -1,15 +1,15 @@
 [
     {
-     "code": 212,
+     "code": 201,
+     "descripcion": "Módulo de aulas"
+    },
+    {
+     "code": 202,
      "descripcion": "Facultad Politécnica"
     },
     {
-     "code": 228,
-     "descripcion": "Facultad de Veterinaria"
-    },
-    {
-     "code": 201,
-     "descripcion": "Módulo de aulas"
+     "code": 212,
+     "descripcion": "Facultad Politécnica"
     },
     {
      "code": 224,
@@ -18,6 +18,10 @@
     {
      "code": 225,
      "descripcion": "Facultad de Ciencias Exactas y Tecnología"
+    },
+    {
+     "code": 228,
+     "descripcion": "Facultad de Veterinaria"
     },
     {
      "code": 233,

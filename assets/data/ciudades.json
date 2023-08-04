@@ -1,0 +1,42 @@
+[
+    {
+     "IdCiudad": 1,
+     "descripcion": "Santa Cruz"
+    },
+    {
+     "IdCiudad": 2,
+     "descripcion": "Montero"
+    },
+    {
+     "IdCiudad": 3,
+     "descripcion": "Warnes"
+    },
+    {
+     "IdCiudad": 4,
+     "descripcion": "Yapacani"
+    },
+    {
+     "IdCiudad": 5,
+     "descripcion": "Puerto Suarez"
+    },
+    {
+     "IdCiudad": 6,
+     "descripcion": "San Julian"
+    },
+    {
+     "IdCiudad": 7,
+     "descripcion": "Robore"
+    },
+    {
+     "IdCiudad": 8,
+     "descripcion": "Vallegrande"
+    },
+    {
+     "IdCiudad": 9,
+     "descripcion": "Camiri"
+    },
+    {
+     "IdCiudad": 10,
+     "descripcion": "San Ignacio de Velasco"
+    }
+   ]
